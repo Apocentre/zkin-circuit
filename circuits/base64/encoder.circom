@@ -42,6 +42,10 @@ template ChunkSplitter() {
 template ChunkEncoder() {
   signal input chunk[5];
   signal output out[5];
+
+  for(var i = 0; i < chunk[4]; i++) {
+    
+  }
 }
 
 template Encoder(max_size, max_encoded_siz, chunk_size) {
@@ -74,4 +78,4 @@ template Encoder(max_size, max_encoded_siz, chunk_size) {
 }
 
 // base64 encoded value has len = 4/3 * ascii_string_len
-component main  = Encoder(100, 134, 33);
+component main = Encoder(100, 134, 33);
