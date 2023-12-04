@@ -72,7 +72,6 @@ template ChunkEncoder() {
       }
     */
     out[i] <== conds[i] * b64_chars[i] + (1 - conds[i]) * get_padding_char();
-    log("out", out[i]);
   }
 }
 
