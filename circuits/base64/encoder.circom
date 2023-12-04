@@ -2,6 +2,7 @@ pragma circom 2.1.6;
 
 include "../../node_modules/circomlib/circuits/comparators.circom";
 include "../utils/not_equal.circom";
+include "./lookup_table.circom";
 
 template ChunkSplitter() {
   signal input chunk[4];
@@ -36,6 +37,11 @@ template ChunkSplitter() {
     c_1[i] <== conds[0] * arr_1[i] + (1 - conds[0]);
     out[i] <== c_1[i] * c_2_i[i];
   }
+}
+
+template ChunkEncoder() {
+  signal input chunk[5];
+  signal output out[5];
 }
 
 template Encoder(max_size, max_encoded_siz, chunk_size) {
