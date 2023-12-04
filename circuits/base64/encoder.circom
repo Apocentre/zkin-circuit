@@ -3,6 +3,7 @@ pragma circom 2.1.6;
 include "../../node_modules/circomlib/circuits/comparators.circom";
 include "../utils/not_equal.circom";
 include "./lookup_table.circom";
+include "./constants.circom";
 
 template ChunkSplitter() {
   signal input chunk[4];
@@ -88,13 +89,13 @@ template Encoder(max_size, max_encoded_size, max_chunk_count) {
     /// have a length of 100 items but we want to pass a byte array that has 30 values. The remaining 70 will be filled
     /// with a value that we know does not exist in ASCII not in base64 look up tables.
     /// So we want to work only on valid bytes i.e. byte != 256 and ingore the rest
-    has_value_conds[i][0] <== NotEqual()([value[start_index], 256]);
-    has_value_conds[i][1] <== NotEqual()([value[start_index + 1], 256]);
-    has_value_conds[i][2] <== NotEqual()([value[start_index + 2], 256]);
+    has_value_conds[i][0] <== NotEqual()([value[start_index], null_char()]);
+    has_value_conds[i][1] <== NotEqual()([value[start_index + 1], null_char()]);
+    has_value_conds[i][2] <== NotEqual()([value[start_index + 2], null_char()]);
     var sum = has_value_conds[i][0] + has_value_conds[i][1] + has_value_conds[i][2];
 
     // sum will help other parts of the code to know how many items this chunk does have indeed. We do 
-    // insert a full chunk of 3 items, but some of those might not have any yvalue i.e. they store the placeholder 256
+    // insert a full chunk of 3 items, but some of those might not have any value i.e. they store the placeholder 256
     chunks[i] <== [value[start_index], value[start_index + 1], value[start_index + 2], sum];
 
     splits[i] = ChunkSplitter();
