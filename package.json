@@ -1,0 +1,10 @@
+{
+  "name": "zk-auth",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "ppoliani <ppoliani@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "circomlib": "^2.0.5"
+  }
+}
