@@ -31,6 +31,15 @@ template ChunkSplitter() {
   signal c_1[5];
 
   for(var i = 0; i < 5; i++) {
+    /**
+      if chunk_len == 1 {
+        out[i] = arr_1;
+      } else if chunk_len == 2 {
+        out[i] = arr_2;
+      } else if chunk_len == 3 {
+        out[i] = arr_2;
+      }
+    **/
     c_3[i] <== conds[2] * arr_3[i];
     c_2[i] <== conds[1] * arr_2[i] + (1 - conds[1]);
     c_2_i[i] <== c_2[i] * c_3[i];
@@ -48,30 +57,41 @@ template ChunkEncoder() {
 
   for(var i = 0; i < 4; i++) {
     conds[i] <== LessEqThan(8)([i, chunk_len]);
+    /**
+      if i <= chunk_len {
+        out[i] <== chunk[i]
+      } else {
+        out[i] = get_padding_char() 
+      }
+    */
     out[i] <== conds[i] * chunk[i] + (1 - conds[i]) * get_padding_char();
   }
 }
 
-template Encoder(max_size, max_encoded_size, chunk_size) {
+
+template Encoder(max_size, max_encoded_size, max_chunk_count) {
   signal input value[max_size];
   signal output out[max_encoded_size];
   // index 4 will store the number of real value it has
-  signal chunks[chunk_size][4];
-  signal has_value_conditions[chunk_size][3];
-  signal condition_eq[chunk_size][3];
-  component splits[chunk_size];
-  component chunk_encoders[chunk_size];
+  signal chunks[max_chunk_count][4];
+  signal has_value_conds[max_chunk_count][3];
+  signal condition_eq[max_chunk_count][3];
+  signal valid_sums[max_chunk_count];
+  component splits[max_chunk_count];
+  component chunk_encoders[max_chunk_count];
+  var last_processed_index = 0;
 
-  for(var i = 0; i < chunk_size; i++){
+  for(var i = 0; i < max_chunk_count; i++){
     var start_index = i * 3;
 
     /// Our arrays have a fixed size, but not all items are values that we need. For example, an fixed array might
-    /// have a length of 100 items but we want to pass a byte array that has 30 values. The remianing 70 will be filled
+    /// have a length of 100 items but we want to pass a byte array that has 30 values. The remaining 70 will be filled
     /// with a value that we know does not exist in ASCII not in base64 look up tables.
-    has_value_conditions[i][0] <== NotEqual()([value[start_index], 256]);
-    has_value_conditions[i][1] <== NotEqual()([value[start_index + 1], 256]);
-    has_value_conditions[i][2] <== NotEqual()([value[start_index + 2], 256]);
-    var sum = has_value_conditions[i][0] + has_value_conditions[i][1] + has_value_conditions[i][2];
+    /// So we want to work only on valid bytes i.e. byte != 256 and ingore the rest
+    has_value_conds[i][0] <== NotEqual()([value[start_index], 256]);
+    has_value_conds[i][1] <== NotEqual()([value[start_index + 1], 256]);
+    has_value_conds[i][2] <== NotEqual()([value[start_index + 2], 256]);
+    var sum = has_value_conds[i][0] + has_value_conds[i][1] + has_value_conds[i][2];
 
     // sum will help other parts of the code to know how many items this chunk does have indeed. We do 
     // insert a full chunk of 3 items, but some of those might not have any yvalue i.e. they store the placeholder 256
@@ -90,4 +110,5 @@ template Encoder(max_size, max_encoded_size, chunk_size) {
 }
 
 // base64 encoded value has len = 4/3 * ascii_string_len
+// the third param is the max chunk count for a string of max_size of 100 bytes Floor(100 / 3) = 3
 component main = Encoder(100, 134, 33);

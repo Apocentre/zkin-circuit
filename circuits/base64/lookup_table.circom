@@ -30,6 +30,19 @@ template GetCharForIndex() {
   // a * f(b) = (1 - a) * g(b)
   // 
   // What wr're doing below is based on this simple interpretation of if statements in circuits with quandratic contraints.
+  /**
+    if (index >= 0 && index <= 25) {
+      out = index + UPPERCASEOFFSET;
+    } else if index >= 26 && index <= 51 {
+      out = index + LOWERCASEOFFSET;
+    } else if index >= 52 && index <= 61 {
+      out = index - DIGITOFFSET;
+    } else if index == 62 {
+      out = 45;
+    } else if index == 63 {
+      out = 95;
+    }
+  **/
   signal c_5 <== eq_2 * 95;
   signal c_4 <== eq_1 * 45 + (1 - eq_1) * c_5;
   signal c_3 <== r_3 * (index - DIGITOFFSET) + (1 - r_3);
