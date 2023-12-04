@@ -46,6 +46,7 @@ template GetIndexForChar() {
   signal eq_1 <== IsEqual()([character, 45]);
   signal eq_2 <== IsEqual()([character, 95]);
 
+  // inverse logic of what we did in `GetCharForIndex`
   signal c_5 <== eq_2 * 63;
   signal c_4 <== eq_1 * 62 + (1 - eq_1) * c_5;
   signal c_3 <== r_3 * (character + DIGITOFFSET) + (1 - r_3);
@@ -55,6 +56,11 @@ template GetIndexForChar() {
   signal c_1 <== r_1 * (character - UPPERCASEOFFSET) + (1 - r_1);
 
   out <== c_1 * c_2;
+}
+
+function get_padding_char() {
+  // this is the equvalent of '='. Not the actual ascii code but some arbitrary value
+  return 256;
 }
 
 
