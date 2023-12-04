@@ -10,10 +10,11 @@ template ChunkSplitter() {
   // the splited chunk can have up to 4 bytes. The fifth item decides the length of the dynamic array
   signal output out[5];
 
-  signal conds[3];
+  signal conds[4];
   conds[0] <== IsEqual()([chunk[3], 1]);
   conds[1] <== IsEqual()([chunk[3], 2]);
   conds[2] <== IsEqual()([chunk[3], 3]);
+  conds[3] <== IsEqual()([chunk[3], 0]);
   var sum = conds[0] + conds[1] + conds[2];
 
   signal arr_1[5] <-- [chunk[0] >> 2, (chunk[0] & 3) << 4, 0, 0, 2];
@@ -27,6 +28,7 @@ template ChunkSplitter() {
   ];
 
   signal c_3[5];
+  signal c_3_i[5];
   signal c_2[5];
   signal c_2_i[5];
   signal c_1[5];
@@ -34,16 +36,17 @@ template ChunkSplitter() {
   for(var i = 0; i < 5; i++) {
     /**
       if chunk_len == 1 {
-        out[i] = arr_1;
+        out[i] = arr_1[i];
       } else if chunk_len == 2 {
-        out[i] = arr_2;
+        out[i] = arr_2[i];
       } else if chunk_len == 3 {
-        out[i] = arr_2;
+        out[i] = arr_3[i];
       }
     **/
-    c_3[i] <== conds[2] * arr_3[i];
+    c_3[i] <== conds[2] * arr_3[i] + (1 - conds[2]);
+    c_3_i[i] <==  c_3[i] * (1 - conds[3]);
     c_2[i] <== conds[1] * arr_2[i] + (1 - conds[1]);
-    c_2_i[i] <== c_2[i] * c_3[i];
+    c_2_i[i] <== c_2[i] * c_3_i[i];
     c_1[i] <== conds[0] * arr_1[i] + (1 - conds[0]);
     out[i] <== c_1[i] * c_2_i[i];
   }
@@ -60,7 +63,7 @@ template ChunkEncoder() {
   for(var i = 0; i < 4; i++) {
     b64_chars[i] <== GetCharForIndex()(chunk[i]);
     conds[i] <== LessEqThan(8)([i, chunk_len]);
-    
+
     /**
       if i <= chunk_len {
         out[i] <== chunk[i]
@@ -69,7 +72,7 @@ template ChunkEncoder() {
       }
     */
     out[i] <== conds[i] * b64_chars[i] + (1 - conds[i]) * get_padding_char();
-    log(out[i]);
+    log("out", out[i]);
   }
 }
 

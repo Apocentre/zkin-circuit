@@ -43,15 +43,15 @@ template GetCharForIndex() {
       out = 95;
     }
   **/
-  signal c_5 <== eq_2 * 95;
+  signal c_5 <== eq_2 * 95 + (1 - eq_2);
   signal c_4 <== eq_1 * 45 + (1 - eq_1) * c_5;
   signal c_3 <== r_3 * (index - DIGITOFFSET) + (1 - r_3);
   signal c_3_i <== c_3 * c_4;
   signal c_2 <== r_2 * (index + LOWERCASEOFFSET) + (1 - r_2);
-  signal c_2_i <== c_2 * c_3;
+  signal c_2_i <== c_2 * c_3_i;
   signal c_1 <== r_1 * (index + UPPERCASEOFFSET) + (1 - r_1);
 
-  out <== c_1 * c_2;
+  out <== c_1 * c_2_i;
 }
 
 template GetIndexForChar() {
@@ -73,15 +73,15 @@ template GetIndexForChar() {
   assert(valid_index);
 
   // inverse logic of what we did in `GetCharForIndex`
-  signal c_5 <== eq_2 * 63;
+  signal c_5 <== eq_2 * 63 + (1 - eq_2);
   signal c_4 <== eq_1 * 62 + (1 - eq_1) * c_5;
   signal c_3 <== r_3 * (character + DIGITOFFSET) + (1 - r_3);
   signal c_3_i <== c_3 * c_4;
   signal c_2 <== r_2 * (character - LOWERCASEOFFSET) + (1 - r_2);
-  signal c_2_i <== c_2 * c_3;
+  signal c_2_i <== c_2 * c_3_i;
   signal c_1 <== r_1 * (character - UPPERCASEOFFSET) + (1 - r_1);
 
-  out <== c_1 * c_2;
+  out <== c_1 * c_2_i;
 }
 
 function get_padding_char() {
