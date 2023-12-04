@@ -10,3 +10,5 @@ artifacts/
 *.r1cs
 *.sym
 *.wtns
+build
+contracts

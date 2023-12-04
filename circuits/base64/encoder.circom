@@ -54,10 +54,13 @@ template ChunkEncoder() {
   signal output out[4];
   var chunk_len = chunk[4];
 
+  signal b64_chars[4];
   signal conds[4];
 
   for(var i = 0; i < 4; i++) {
+    b64_chars[i] <== GetCharForIndex()(chunk[i]);
     conds[i] <== LessEqThan(8)([i, chunk_len]);
+    
     /**
       if i <= chunk_len {
         out[i] <== chunk[i]
@@ -65,7 +68,8 @@ template ChunkEncoder() {
         out[i] = get_padding_char() 
       }
     */
-    out[i] <== conds[i] * chunk[i] + (1 - conds[i]) * get_padding_char();
+    out[i] <== conds[i] * b64_chars[i] + (1 - conds[i]) * get_padding_char();
+    log(out[i]);
   }
 }
 

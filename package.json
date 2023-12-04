@@ -4,6 +4,9 @@
   "main": "index.js",
   "author": "ppoliani <ppoliani@gmail.com>",
   "license": "MIT",
+  "scripts": {
+    "compile": "circom circuits/base64/encoder.circom  --r1cs --sym --wasm -o build"
+  },
   "dependencies": {
     "circomlib": "^2.0.5"
   }
