@@ -41,21 +41,26 @@ template ChunkSplitter() {
 
 template ChunkEncoder() {
   signal input chunk[5];
-  signal output out[5];
+  signal output out[4];
+  var chunk_len = chunk[4];
 
-  for(var i = 0; i < chunk[4]; i++) {
-    
+  signal conds[4];
+
+  for(var i = 0; i < 4; i++) {
+    conds[i] <== LessEqThan(8)([i, chunk_len]);
+    out[i] <== conds[i] * chunk[i] + (1 - conds[i]) * get_padding_char();
   }
 }
 
-template Encoder(max_size, max_encoded_siz, chunk_size) {
+template Encoder(max_size, max_encoded_size, chunk_size) {
   signal input value[max_size];
-  signal output out[max_encoded_siz];
+  signal output out[max_encoded_size];
   // index 4 will store the number of real value it has
   signal chunks[chunk_size][4];
   signal has_value_conditions[chunk_size][3];
   signal condition_eq[chunk_size][3];
   component splits[chunk_size];
+  component chunk_encoders[chunk_size];
 
   for(var i = 0; i < chunk_size; i++){
     var start_index = i * 3;
@@ -74,6 +79,13 @@ template Encoder(max_size, max_encoded_siz, chunk_size) {
 
     splits[i] = ChunkSplitter();
     splits[i].chunk <== chunks[i];
+    chunk_encoders[i] = ChunkEncoder();
+    chunk_encoders[i].chunk <== splits[i].out;
+
+    for(var j = 0; j < 4; j++) {
+      var index = i * 4;
+      out[index + j] <== chunk_encoders[i].out[j];
+    }
   }
 }
 
