@@ -21,6 +21,11 @@ template GetCharForIndex() {
   // so we have to compute all branches and return the one that matches the condition. For example, if index
   // is  in the range [0, 25] then r_1 will be equal to 1 and thus out signal will be (index + UPPERCASEOFFSET).
   // If not then we move on to check the seconds if statement which is if index is in the range [25, 51] and so on.
+  // 
+  // In general a condition like this if(a) { f(b) } else { g(b) } is similar to the following constaint:
+  // a * f(b) = (1 - a) * g(b)
+  // 
+  // What wr're doing below is based on this simple interpretation of if statements in circuits with quandratic contraints.
   signal c_5 <== eq_2 * 95;
   signal c_4 <== eq_1 * 45 + (1 - eq_1) * c_5;
   signal c_3 <== r_3 * (index - DIGITOFFSET) + (1 - r_3);
