@@ -9,7 +9,7 @@ template Sum(N) {
   signal outs[N];
   outs[0] <== in[0];
 
-  for (var i=1; i < N; i++) {
+  for (var i = 1; i < N; i++) {
     outs[i] <== outs[i - 1] + in[i];
   }
 

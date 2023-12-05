@@ -91,7 +91,7 @@ template GetIndexForChar() {
   out <== c_1 * c_2_i;
 }
 
-function get_padding_char() {
+function padding_char() {
   // this is the equvalent of '='. Not the actual ascii code but some arbitrary value
   return 256;
 }
