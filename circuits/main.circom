@@ -29,4 +29,7 @@ template ZkAuth(
 
 // base64 encoded value has len = 4/3 * ascii_string_len
 // the third param is the max chunk count for a string of max_size of 100 bytes Floor(100 / 3) = 3
-component main {public [iss, iss_loc]} = ZkAuth(100, 134, 33, 1000);
+// Note that we follow a pattern where the last item in each array dictates it's real size i.e. count of 
+// actaul elements and not placeholder values.
+// The max_claim size is 100 for example but we pass an arrat of 101 items. Similarly for all arrays.
+component main {public [iss, iss_loc]} = ZkAuth(101, 135, 33, 1000);
