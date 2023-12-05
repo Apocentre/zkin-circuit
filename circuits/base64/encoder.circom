@@ -75,7 +75,6 @@ template ChunkEncoder() {
   }
 }
 
-
 template Encoder(max_size, max_encoded_size, max_chunk_count) {
   signal input value[max_size];
   signal output out[max_encoded_size];
@@ -118,4 +117,4 @@ template Encoder(max_size, max_encoded_size, max_chunk_count) {
 
 // base64 encoded value has len = 4/3 * ascii_string_len
 // the third param is the max chunk count for a string of max_size of 100 bytes Floor(100 / 3) = 3
-component main = Encoder(100, 134, 33);
+// component main = Encoder(100, 134, 33);
