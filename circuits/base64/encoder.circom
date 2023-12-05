@@ -21,7 +21,14 @@ template ChunkSplitter() {
 
   // We use <-- which does not create any constraint. This is probably why it operates without module p. We can
   // probably convert the values to to bit `numToBits` and then apply the logical operators on the bits.
-  signal arr_1[5] <-- [chunk[0] >> 2, (chunk[0] & 3) << 4, 0, 0, 2];
+  signal arr_1_i[5] <-- [chunk[0] >> 2, (chunk[0] & 3) << 4, 0, 0, 2];
+  // signal arr_1[5] <== arr_1_i;
+  // arr_1[0] <-- chunk[0] >> 2;
+  // arr_1[1] <-- (chunk[0] & 3) << 4;
+  // arr_1[2] <-- 0;
+  // arr_1[3] <-- 0;
+  // arr_1[4] <-- 2;
+  
   signal arr_2[5] <-- [chunk[0] >> 2, (chunk[0] & 3) << 4 | chunk[1] >> 4, (chunk[1] & 15) << 2, 0, 3];
   signal arr_3[5] <-- [
     chunk[0] >> 2,
