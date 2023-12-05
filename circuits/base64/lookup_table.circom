@@ -32,14 +32,21 @@ template GetCharForIndex() {
   // What wr're doing below is based on this simple interpretation of if statements in circuits with quandratic contraints.
   /**
     if (index >= 0 && index <= 25) {
+      // A-Z
       out = index + UPPERCASEOFFSET;
     } else if index >= 26 && index <= 51 {
+      // a-z
       out = index + LOWERCASEOFFSET;
     } else if index >= 52 && index <= 61 {
+      // 0-9
       out = index - DIGITOFFSET;
     } else if index == 62 {
+      // We want to replace + with - in ascii. '+' has index 43 in the ascii table 
+      // but we want to use index 45 which is the index of symbol -
       out = 45;
     } else if index == 63 {
+      // We want to replace / with _ in ascii. '/' has index 47 in the ascii table 
+      // but we want to use index 95 which is the index of symbol _
       out = 95;
     }
   **/

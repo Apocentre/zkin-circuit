@@ -58,20 +58,29 @@ template ChunkEncoder() {
   var chunk_len = chunk[4];
 
   signal b64_chars[4];
-  signal conds[4];
+  signal conds_1[4];
+  signal conds_2[4];
+  signal c_1[4];
+  signal c_2[4];
 
   for(var i = 0; i < 4; i++) {
     b64_chars[i] <== GetCharForIndex()(chunk[i]);
-    conds[i] <== LessThan(8)([i, chunk_len]);
+    conds_1[i] <== LessThan(8)([i, chunk_len]);
+    conds_2[i] <== IsEqual()([chunk_len, 0]);
 
     /**
       if i <= chunk_len {
         out[i] <== chunk[i]
+      } if chunk_len == 0 {
+        out[i] = null_char() 
       } else {
         out[i] = get_padding_char() 
       }
     */
-    out[i] <== conds[i] * b64_chars[i] + (1 - conds[i]) * get_padding_char();
+    c_1[i] <==  conds_2[i] * null_char() + (1 - conds_2[i]) * get_padding_char();
+    c_2[i] <== (1 - conds_1[i]) * c_1[i];
+    out[i] <== conds_1[i] * b64_chars[i] + c_2[i];
+
   }
 }
 
@@ -92,7 +101,7 @@ template Encoder(max_size, max_encoded_size, max_chunk_count) {
     /// Our arrays have a fixed size, but not all items are values that we need. For example, an fixed array might
     /// have a length of 100 items but we want to pass a byte array that has 30 values. The remaining 70 will be filled
     /// with a value that we know does not exist in ASCII not in base64 look up tables.
-    /// So we want to work only on valid bytes i.e. byte != 256 and ingore the rest
+    /// So we want to work only on valid bytes i.e. byte != 127 and ingore the rest
     has_value_conds[i][0] <== NotEqual()([value[start_index], null_char()]);
     has_value_conds[i][1] <== NotEqual()([value[start_index + 1], null_char()]);
     has_value_conds[i][2] <== NotEqual()([value[start_index + 2], null_char()]);
@@ -110,10 +119,11 @@ template Encoder(max_size, max_encoded_size, max_chunk_count) {
     for(var j = 0; j < 4; j++) {
       var index = i * 4;
       out[index + j] <== chunk_encoders[i].out[j];
+      log(out[index + j]);
     }
   }
 }
 
 // base64 encoded value has len = 4/3 * ascii_string_len
 // the third param is the max chunk count for a string of max_size of 100 bytes Floor(100 / 3) = 3
-// component main = Encoder(100, 134, 33);
+component main = Encoder(101, 134, 33);
