@@ -3,7 +3,7 @@ pragma circom 2.1.6;
 include "../../node_modules/circomlib/circuits/comparators.circom";
 include "../utils/not_equal.circom";
 include "./lookup_table.circom";
-include "./constants.circom";
+include "../utils/constants.circom";
 
 template ChunkSplitter() {
   signal input chunk[4];
@@ -32,7 +32,7 @@ template ChunkSplitter() {
   signal c_2[5];
   signal c_2_i[5];
   signal c_1[5];
-
+  
   for(var i = 0; i < 5; i++) {
     /**
       if chunk_len == 1 {
@@ -62,7 +62,7 @@ template ChunkEncoder() {
 
   for(var i = 0; i < 4; i++) {
     b64_chars[i] <== GetCharForIndex()(chunk[i]);
-    conds[i] <== LessEqThan(8)([i, chunk_len]);
+    conds[i] <== LessThan(8)([i, chunk_len]);
 
     /**
       if i <= chunk_len {
