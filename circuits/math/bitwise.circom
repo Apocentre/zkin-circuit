@@ -2,6 +2,7 @@ pragma circom 2.1.6;
 
 include "../../node_modules/circomlib/circuits/bitify.circom";
 include "../../node_modules/circomlib/circuits/sha256/shift.circom";
+include "../../node_modules/circomlib/circuits/gates.circom";
 
 template RightShift(n, r) {
   signal input num;
@@ -49,6 +50,38 @@ template LeftShift(n, r) {
   out <== b2n.out;
 }
 
+template LogicalAnd(n) {
+  signal input a;
+  signal input b;
+  signal output out;
+
+  // convert num to bits
+  component n2b_a = Num2Bits(n);
+  n2b_a.in <== a;
+  component n2b_b = Num2Bits(n);
+  n2b_b.in <== b;
+  
+  signal result[n];
+  component and[n];
+
+  // logical and on each bit
+  for (var i = 0; i < n; i++) {
+    and[i] = AND();
+    and[i].a <== n2b_a.out[i];
+    and[i].b <== n2b_b.out[i];
+
+    result[i] <== and[i].out;
+  }
+
+  // convert back to number
+  component b2n = Bits2Num(n);
+  for (var i = 0; i < n; i++) {
+    b2n.in[i] <== result[i];
+  }
+
+  out <== b2n.out;
+}
+
 /// This is similar to ShR from the Circomlib
 template LhR(n, r) {
   signal input in[n];
@@ -62,4 +95,3 @@ template LhR(n, r) {
     }
   }
 }
-
