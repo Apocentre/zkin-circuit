@@ -12,3 +12,4 @@ artifacts/
 *.wtns
 build
 contracts
+test_build
