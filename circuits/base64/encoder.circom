@@ -1,9 +1,11 @@
 pragma circom 2.1.6;
 
 include "../../node_modules/circomlib/circuits/comparators.circom";
+include "../../node_modules/circomlib/circuits/binsum.circom";
 include "../utils/not_equal.circom";
 include "./lookup_table.circom";
 include "../utils/constants.circom";
+include "../math/aggregation.circom";
 
 template ChunkSplitter() {
   signal input chunk[4];
@@ -17,6 +19,8 @@ template ChunkSplitter() {
   conds[3] <== IsEqual()([chunk[3], 0]);
   var sum = conds[0] + conds[1] + conds[2];
 
+  // We use <-- which does not create any constraint. This is probably why it operates without module p. We can
+  // probably convert the values to to bit `numToBits` and then apply the logical operators on the bits.
   signal arr_1[5] <-- [chunk[0] >> 2, (chunk[0] & 3) << 4, 0, 0, 2];
   signal arr_2[5] <-- [chunk[0] >> 2, (chunk[0] & 3) << 4 | chunk[1] >> 4, (chunk[1] & 15) << 2, 0, 3];
   signal arr_3[5] <-- [
@@ -87,13 +91,16 @@ template ChunkEncoder() {
 template Encoder(max_size, max_encoded_size, max_chunk_count) {
   signal input value[max_size];
   signal output out[max_encoded_size];
+  signal output encoded_len;
   // index 4 will store the number of real value it has
   signal chunks[max_chunk_count][4];
   signal has_value_conds[max_chunk_count][3];
-  signal valid_sums[max_chunk_count];
   component splits[max_chunk_count];
   component chunk_encoders[max_chunk_count];
-  var last_processed_index = 0;
+  
+  // The array will have 1s at the indexes where the out array has a padding or null_char i.e value >= null_char()
+  component real_len[max_encoded_size];
+  // component sum = BinSum(8, 2);
 
   for(var i = 0; i < max_chunk_count; i++){
     var start_index = i * 3;
@@ -101,7 +108,7 @@ template Encoder(max_size, max_encoded_size, max_chunk_count) {
     /// Our arrays have a fixed size, but not all items are values that we need. For example, an fixed array might
     /// have a length of 100 items but we want to pass a byte array that has 30 values. The remaining 70 will be filled
     /// with a value that we know does not exist in ASCII not in base64 look up tables.
-    /// So we want to work only on valid bytes i.e. byte != 127 and ingore the rest
+    /// So we want to work only on valid bytes i.e. byte != null_char() and ingore the rest
     has_value_conds[i][0] <== NotEqual()([value[start_index], null_char()]);
     has_value_conds[i][1] <== NotEqual()([value[start_index + 1], null_char()]);
     has_value_conds[i][2] <== NotEqual()([value[start_index + 2], null_char()]);
@@ -118,10 +125,17 @@ template Encoder(max_size, max_encoded_size, max_chunk_count) {
 
     for(var j = 0; j < 4; j++) {
       var index = i * 4;
-      out[index + j] <== chunk_encoders[i].out[j];
-      log(out[index + j]);
+      var j_index = index + j;
+      out[j_index] <== chunk_encoders[i].out[j];
+      
+      // real_len[j_index] = LessEqThan(8);
+      // real_len[j_index].in <== [out[j_index], null_char()];
+      // sum[0][j_index] <== real_len[j_index].out;
     }
   }
+
+  // encoded_len <== total_len;
+  // log(encoded_len);
 }
 
 // base64 encoded value has len = 4/3 * ascii_string_len
