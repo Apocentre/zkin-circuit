@@ -49,13 +49,13 @@ template Slice(N) {
   signal selections[N];
   signal rangeChecks[N];
 
-   for(var i = 0; i < N; i++) {
-    // Check that start + i < diff
-    rangeChecks = LessThan(10)([start + i, end])
-    // Get the element at index: start + i
-    selections[i] = AtIndex(N)([arr, start + i]);
+  for(var i = 0; i < N; i++) {
+  // Check that start + i < diff
+  rangeChecks = LessThan(10)([start + i, end])
+  // Get the element at index: start + i
+  selections[i] = AtIndex(N)([arr, start + i]);
 
-    // Set 0 to indexes outside the range. If inside the set the value at index taken from selections[i]
-    out[i] <== selections[i] * rangeChecks[i]; 
-   }
+  // Set 0 to indexes outside the range. If inside the set the value at index taken from selections[i]
+  out[i] <== selections[i] * rangeChecks[i]; 
+  }
 }
