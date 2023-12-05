@@ -13,5 +13,5 @@ template JwtInclusion(
   signal input claim_loc;
   
   component encoder = Encoder(max_claim_size, max_encoded_claim_size, max_chunk_count);
-  encoder.value = claim;
+  encoder.value <== claim;
 }

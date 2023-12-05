@@ -81,7 +81,6 @@ template Encoder(max_size, max_encoded_size, max_chunk_count) {
   // index 4 will store the number of real value it has
   signal chunks[max_chunk_count][4];
   signal has_value_conds[max_chunk_count][3];
-  signal condition_eq[max_chunk_count][3];
   signal valid_sums[max_chunk_count];
   component splits[max_chunk_count];
   component chunk_encoders[max_chunk_count];
