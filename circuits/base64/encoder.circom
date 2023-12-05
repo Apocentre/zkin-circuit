@@ -39,9 +39,9 @@ template ChunkSplitter() {
   // chunk[2] & 63
   signal val_3_3 <== And(8)(chunk[2], 63);
 
-  signal arr_1[5] <-- [val_1_0, val_1_1, 0, 0, 2];
-  signal arr_2[5] <-- [val_1_0, val_2_1, val_1_2, 0, 3];
-  signal arr_3[5] <-- [val_1_0, val_2_1, val_3_2, val_3_3, 4];
+  signal arr_1[5] <== [val_1_0, val_1_1, 0, 0, 2];
+  signal arr_2[5] <== [val_1_0, val_2_1, val_1_2, 0, 3];
+  signal arr_3[5] <== [val_1_0, val_2_1, val_3_2, val_3_3, 4];
 
   signal c_3[5];
   signal c_3_i[5];
