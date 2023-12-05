@@ -26,9 +26,13 @@ template Slice(N) {
   signal output out[N];
 
   // Require that start >= 0
-  GreaterEqThan(10)([start, 0]) === 1;
+  signal start_cond <== GreaterEqThan(10)([start, 0]);
+  // start_cond.in <== [start, 0];
+  start_cond === 1;
+
   // Require that end < N
-  LessThan(10)([end, N]) === 1;
+  signal end_cond <== LessThan(10)([end, N]);
+  end_cond === 1;
 
   // Select the elements at the indexes between start and end, and 0-pad the rest
   signal selections[N];
@@ -36,9 +40,9 @@ template Slice(N) {
 
   for(var i = 0; i < N; i++) {
     // Check that start + i < diff
-    rangeChecks = LessThan(10)([start + i, end])
+    rangeChecks[i] <== LessThan(10)([start + i, end]);
     // Get the element at index: start + i
-    selections[i] = AtIndex(N)([arr, start + i]);
+    selections[i] <== AtIndex(N)(arr, start + i);
 
     // Set 0 to indexes outside the range. If inside the set the value at index taken from selections[i]
     out[i] <== selections[i] * rangeChecks[i]; 

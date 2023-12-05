@@ -1,8 +1,9 @@
 pragma circom 2.1.6;
 
+include "../../node_modules/circomlib/circuits/comparators.circom";
 include "../base64/encoder.circom";
-include "../collections/slice.circom";
 include "../utils/constants.circom";
+include "../collections/slice.circom";
 
 template JwtInclusion(
   max_claim_size,
@@ -19,18 +20,21 @@ template JwtInclusion(
   encoder.value <== claim;
 
   signal isB64Char[max_jwt_size];
-  signal within_jwt_slice[max_jwt_size];
 
-  for(var i = 0; i < max_jwt_size; i++) {
-    isB64Char[i] <== LessThan(8)(encoder.out[i], null_char());
-    within_jwt_slice[i] <== GreaterEqThan(16)(i, claim_loc);
+  component selections[max_encoded_claim_size];
+  component assertions[max_encoded_claim_size];
 
-    // if both above values are 1 then we shoudl compare the corresponding jwt and encoded claim bytes
-    
+  for(var i = 0; i < max_encoded_claim_size; i++) {
+    // TODO: ignore the first 4 and last 4 items if the claim has some offset
+    selections[i] = AtIndex(max_jwt_size);
+    selections[i].array <== jwt;
+    selections[i].index <== claim_loc + i;
+
+    // make sure all bytes are the same
+    isB64Char[i] <== LessThan(8)([encoder.out[i], null_char()]);
+    assertions[i] = IsEqual();
+    assertions[i].in <== [isB64Char[i] * encoder.out[i], selections[i].out * isB64Char[i]];
+
+    assertions[i].out === 1;
   }
-
-  // component encode_claim_part = Slice(max_jwt_size);
-  // encode_claim_part.arr <== jwt;
-  // encode_claim_part.start <== claim_loc;
-  // encode_claim_part.end <== claim_loc + encoder.out[max_encoded_claim_size];
 }

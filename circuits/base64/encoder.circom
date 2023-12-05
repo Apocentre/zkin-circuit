@@ -25,7 +25,7 @@ template ChunkSplitter() {
   signal val_1_1 <== LeftShift(8, 4)(And(8)(chunk[0], 3));
   // (chunk[0] & 3) << 4 | chunk[1] >> 4,
   signal val_2_1 <== Or(8)(
-    val_1_0,
+    val_1_1,
     RightShift(8, 4)(chunk[1])
   );
   // (chunk[1] & 15) << 2
@@ -110,7 +110,7 @@ template Encoder(max_size, max_encoded_size, max_chunk_count) {
   component chunk_encoders[max_chunk_count];
   
   signal real_len[max_encoded_size];
-  signal len_arr[max_encoded_size];
+  signal len_arr[max_encoded_size + 1];
   len_arr[0] <== 0;
 
   for(var i = 0; i < max_chunk_count; i++){
@@ -144,9 +144,9 @@ template Encoder(max_size, max_encoded_size, max_chunk_count) {
     }
   }
   
-  encoded_len <== len_arr[max_encoded_size - 1];
+  encoded_len <== len_arr[max_encoded_size];
 }
 
 // base64 encoded value has len = 4/3 * ascii_string_len
 // the third param is the max chunk count for a string of max_size of 100 bytes Floor(100 / 3) = 3
-component main = Encoder(100, 133, 33);
+// component main = Encoder(102, 136, 34);
