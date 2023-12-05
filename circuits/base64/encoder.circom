@@ -6,6 +6,7 @@ include "../utils/not_equal.circom";
 include "./lookup_table.circom";
 include "../utils/constants.circom";
 include "../math/aggregation.circom";
+include "../math/bitwise.circom";
 
 template ChunkSplitter() {
   signal input chunk[4];
@@ -19,24 +20,28 @@ template ChunkSplitter() {
   conds[3] <== IsEqual()([chunk[3], 0]);
   var sum = conds[0] + conds[1] + conds[2];
 
-  // We use <-- which does not create any constraint. This is probably why it operates without module p. We can
-  // probably convert the values to to bit `numToBits` and then apply the logical operators on the bits.
-  signal arr_1_i[5] <-- [chunk[0] >> 2, (chunk[0] & 3) << 4, 0, 0, 2];
-  // signal arr_1[5] <== arr_1_i;
-  // arr_1[0] <-- chunk[0] >> 2;
-  // arr_1[1] <-- (chunk[0] & 3) << 4;
-  // arr_1[2] <-- 0;
-  // arr_1[3] <-- 0;
-  // arr_1[4] <-- 2;
-  
-  signal arr_2[5] <-- [chunk[0] >> 2, (chunk[0] & 3) << 4 | chunk[1] >> 4, (chunk[1] & 15) << 2, 0, 3];
-  signal arr_3[5] <-- [
-    chunk[0] >> 2,
-    (chunk[0] & 3) << 4 | chunk[1] >> 4,
-    (chunk[1] & 15) << 2 | chunk[2] >> 6,
-    chunk[2] & 63,
-    4
-  ];
+  // chunk[0] >> 2
+  signal val_1_0 <== RightShift(8, 2)(chunk[0]);
+  // (chunk[0] & 3) << 4
+  signal val_1_1 <== LeftShift(8, 4)(And(8)(chunk[0], 3));
+  // (chunk[0] & 3) << 4 | chunk[1] >> 4,
+  signal val_2_1 <== Or(8)(
+    val_1_0,
+    RightShift(8, 4)(chunk[1])
+  );
+  // (chunk[1] & 15) << 2
+  signal val_1_2 <== LeftShift(8, 2)(And(8)(chunk[1], 15));
+  // (chunk[1] & 15) << 2 | chunk[2] >> 6
+  signal val_3_2 <== Or(8)(
+    val_1_2,
+    RightShift(8, 6)(chunk[2])
+  );
+  // chunk[2] & 63
+  signal val_3_3 <== And(8)(chunk[2], 63);
+
+  signal arr_1[5] <-- [val_1_0, val_1_1, 0, 0, 2];
+  signal arr_2[5] <-- [val_1_0, val_2_1, val_1_2, 0, 3];
+  signal arr_3[5] <-- [val_1_0, val_2_1, val_3_2, val_3_3, 4];
 
   signal c_3[5];
   signal c_3_i[5];
@@ -91,7 +96,6 @@ template ChunkEncoder() {
     c_1[i] <==  conds_2[i] * null_char() + (1 - conds_2[i]) * get_padding_char();
     c_2[i] <== (1 - conds_1[i]) * c_1[i];
     out[i] <== conds_1[i] * b64_chars[i] + c_2[i];
-
   }
 }
 
@@ -134,7 +138,6 @@ template Encoder(max_size, max_encoded_size, max_chunk_count) {
       var index = i * 4;
       var j_index = index + j;
       out[j_index] <== chunk_encoders[i].out[j];
-      
       // real_len[j_index] = LessEqThan(8);
       // real_len[j_index].in <== [out[j_index], null_char()];
       // sum[0][j_index] <== real_len[j_index].out;
