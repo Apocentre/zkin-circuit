@@ -63,4 +63,4 @@ template Decoder(max_size, max_encoded_size, max_chunk_count) {
   }
 }
 
-component main = Decoder(102, 136, 32);
+component main = Decoder(105, 140, 35);
