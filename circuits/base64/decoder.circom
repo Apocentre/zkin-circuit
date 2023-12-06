@@ -45,6 +45,8 @@ template ChunkDecoder() {
     c_1[i] <== (1 - conds_1[i]) * null_char();
     out[i] <== conds_1[i] * b64_indexes[i] + c_1[i];
   }
+
+  out[4] <== len;
 }
 
 template Decoder(max_size, max_encoded_size, max_chunk_count) {
