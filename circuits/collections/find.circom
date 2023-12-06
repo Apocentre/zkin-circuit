@@ -40,7 +40,7 @@ template Find(N) {
 }
 
 /// Same purpose as IncrementValue but we don't increment rather we set the element to value 0
-template NullifyValue(N) {
+template NullifyElementAtIndex(N) {
   signal input in[N];
   signal input index;
   signal output out[N][2];
