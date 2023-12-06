@@ -42,7 +42,6 @@ template ChunkSplitter() {
   conds[3] <== IsEqual()([chunk[3], 0]);
 
   signal c_3[5];
-  signal c_3_i[5];
   signal c_2[5];
   signal c_2_i[5];
   signal c_1[5];
@@ -57,12 +56,11 @@ template ChunkSplitter() {
         out[i] = arr_3[i];
       }
     **/
-    c_3[i] <== conds[2] * arr_3[i] + (1 - conds[2]);
-    c_3_i[i] <== c_3[i] * (1 - conds[3]);
-    c_2[i] <== conds[1] * arr_2[i] + (1 - conds[1]);
-    c_2_i[i] <== c_2[i] * c_3_i[i];
-    c_1[i] <== conds[0] * arr_1[i] + (1 - conds[0]);
-    out[i] <== c_1[i] * c_2_i[i];
+    c_3[i] <== conds[2] * arr_3[i];
+    c_2_i[i] <== (1 - conds[1]) * c_3[i];
+    c_2[i] <== conds[1] * arr_2[i] + c_2_i[i];
+    c_1[i] <== (1 - conds[0]) * c_2[i];
+    out[i] <== conds[0] * arr_1[i] + c_1[i];
   }
 }
 
