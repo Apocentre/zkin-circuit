@@ -101,7 +101,7 @@ template ChunkEncoder() {
 template Encoder(max_size, max_encoded_size, max_chunk_count) {
   signal input value[max_size];
   signal output out[max_encoded_size];
-  signal output encoded_len;
+  signal output len;
 
   // index 4 will store the number of real value it has
   signal chunks[max_chunk_count][4];
@@ -139,12 +139,12 @@ template Encoder(max_size, max_encoded_size, max_chunk_count) {
       var j_index = index + j;
       out[j_index] <== chunk_encoders[i].out[j];
 
-      real_len[j_index] <== LessThan(8)([out[j_index], null_char()]);
+      real_len[j_index] <== NotEqual()([out[j_index], null_char()]);
       len_arr[j_index + 1] <== len_arr[j_index] + real_len[j_index];
     }
   }
   
-  encoded_len <== len_arr[max_encoded_size];
+  len <== len_arr[max_encoded_size];
 }
 
 // base64 encoded value has len = 4/3 * ascii_string_len

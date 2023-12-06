@@ -19,7 +19,7 @@ template AtIndex(N) {
   out <== sum.out;
 }
 
-template Slice(N) {
+template Slice(N, PAD) {
   signal input arr[N];
   signal input start;
   signal input end;
@@ -37,6 +37,7 @@ template Slice(N) {
   // Select the elements at the indexes between start and end, and 0-pad the rest
   signal selections[N];
   signal rangeChecks[N];
+  signal pads[N];
 
   for(var i = 0; i < N; i++) {
     // Check that start + i < diff
@@ -44,7 +45,9 @@ template Slice(N) {
     // Get the element at index: start + i
     selections[i] <== AtIndex(N)(arr, start + i);
 
+    pads[i] <== rangeChecks[i] * 0 + (1 - rangeChecks[i]) * PAD;
+
     // Set 0 to indexes outside the range. If inside the set the value at index taken from selections[i]
-    out[i] <== selections[i] * rangeChecks[i]; 
+    out[i] <== selections[i] * rangeChecks[i] + pads[i];
   }
 }

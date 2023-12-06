@@ -9,7 +9,8 @@ template JwtInclusion(
   max_claim_size,
   max_encoded_claim_size,
   max_chunk_count,
-  max_jwt_size
+  max_jwt_size,
+  has_padding
 ) {
   signal input jwt[max_jwt_size];
   signal input claim[max_claim_size];
@@ -19,17 +20,21 @@ template JwtInclusion(
   component encoder = Encoder(max_claim_size, max_encoded_claim_size, max_chunk_count);
   encoder.value <== claim;
 
+  // remove first 4 and last 4 bytes if encoded claim is padded i.e. offset 1 or 2 
+  signal start <== has_padding * 4;
+  signal end <== encoder.len - start;
+  signal final_encoded_claim[max_encoded_claim_size] <== Slice(max_encoded_claim_size, null_char())(encoder.out, start, end);
+
   signal isB64Char[max_jwt_size];
   signal selections[max_encoded_claim_size];
   signal assertions[max_encoded_claim_size];
 
   for(var i = 0; i < max_encoded_claim_size; i++) {
-    // TODO: ignore the first 4 and last 4 items if the claim has some offset
     selections[i] <== AtIndex(max_jwt_size)(jwt, claim_loc + i);
-    
+
     // make sure all bytes are the same
-    isB64Char[i] <== LessThan(8)([encoder.out[i], null_char()]);
-    assertions[i] <== IsEqual()([isB64Char[i] * encoder.out[i], selections[i] * isB64Char[i]]);
+    isB64Char[i] <== LessThan(8)([final_encoded_claim[i], null_char()]);
+    assertions[i] <== IsEqual()([isB64Char[i] * final_encoded_claim[i], selections[i] * isB64Char[i]]);
 
     assertions[i] === 1;
   }
