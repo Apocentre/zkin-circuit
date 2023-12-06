@@ -6,23 +6,6 @@ include "./Find.circom";
 /// Filter all occurences of the given item from the input array. Fitlering essentially means moving all 
 /// matches to the end of the output array.
 
-// Find will return the exact same index for the same array. If we want to search for multiple occurences of the same item
-// then we would need to change that value slightly so it doesn't get caught by the Find circuit
-template IncrementValue(N) {
-  signal input in[N];
-  signal input index;
-  signal output out[N][2];
-
-  signal eq[N];
-
-  for (var i = 0; i < N; i++) {
-		eq[i] = IsEqual([i, index]);
-
-    // increment the value at Index if i == index
-		out[i] <== in[i] + eq[i];
-	}
-}
-
 // At the moment this works with max array size of 100 elements. 
 template Filter(N) {
   signal input in[N];
