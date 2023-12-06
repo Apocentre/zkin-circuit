@@ -11,12 +11,6 @@ template ChunkSticher() {
   signal input chunk[5];
   signal output out[3];
 
-  signal conds[3];
-  conds[0] <== IsEqual()([chunk[3], 2]);
-  conds[1] <== IsEqual()([chunk[3], 3]);
-  conds[2] <== IsEqual()([chunk[3], 4]);
-  var sum = conds[0] + conds[1] + conds[2];
-
   // (chunk[0] & 63) << 2 | chunk[1] >> 4
   signal val_1_0 <== Or(8)(
     LeftShift(8, 2)(And(8)(chunk[0], 63)),
@@ -24,6 +18,7 @@ template ChunkSticher() {
   );
   // (chunk[1] & 15) << 4
   signal val_1_1 <== LeftShift(8, 4)(And(8)(chunk[1], 15));
+  
   // (chunk[1] & 15) << 4 | chunk[2] >> 2)
   signal val_2_1 <== Or(8)(
     LeftShift(8, 4)(And(8)(chunk[1], 15)),
@@ -41,6 +36,11 @@ template ChunkSticher() {
   signal arr_2[3] <== [val_1_0, val_2_1, val_2_2];
   signal arr_3[3] <== [val_1_0, val_2_1, val_3_1];
 
+  signal conds[4];
+  conds[0] <== IsEqual()([chunk[4], 2]);
+  conds[1] <== IsEqual()([chunk[4], 3]);
+  conds[2] <== IsEqual()([chunk[4], 4]);
+  
   signal c_3[3];
   signal c_2[3];
   signal c_2_i[3];
@@ -52,15 +52,15 @@ template ChunkSticher() {
         out[i] = arr_1[i];
       } else if chunk_len == 3 {
         out[i] = arr_2[i];
-      } else if chunk_len == 4{
+      } else if chunk_len == 4 {
         out[i] = arr_3[i];
       }
     **/
-    c_3[i] <== conds[2] * arr_3[i] + (1 - conds[2]);
-    c_2[i] <== conds[1] * arr_2[i] + (1 - conds[1]);
-    c_2_i[i] <== c_2[i] * c_3[i];
-    c_1[i] <== conds[0] * arr_1[i] + (1 - conds[0]);
-    out[i] <== c_1[i] * c_2_i[i];
+    c_3[i] <== conds[2] * arr_3[i];
+    c_2[i] <== (1 - conds[1]) * c_3[i];
+    c_2_i[i] <== conds[1] * arr_2[i] + c_2[i];
+    c_1[i] <== (1 - conds[0]) * c_2_i[i];
+    out[i] <== conds[0] * arr_1[i] + c_1[i];
   }
 }
 
@@ -70,14 +70,14 @@ template ChunkDecoder() {
   var chunk_len = chunk[4];
 
   signal b64_indexes[4];
-  signal conds_1[4];
+  signal conds[4];
   signal c_1[4];
   var len = 0;
 
   for(var i = 0; i < 4; i++) {
     b64_indexes[i] <== GetIndexForChar()(chunk[i]);
-    conds_1[i] <== LessThan(8)([i, chunk_len]);
-    len += conds_1[i];
+    conds[i] <== LessThan(8)([i, chunk_len]);
+    len += conds[i];
 
     /**
       if i < chunk_len {
@@ -86,8 +86,8 @@ template ChunkDecoder() {
         out[i] = null_char() 
       }
     */
-    c_1[i] <== (1 - conds_1[i]) * null_char();
-    out[i] <== conds_1[i] * b64_indexes[i] + c_1[i];
+    c_1[i] <== (1 - conds[i]) * null_char();
+    out[i] <== conds[i] * b64_indexes[i] + c_1[i];
   }
 
   out[4] <== len;

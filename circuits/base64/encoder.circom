@@ -12,12 +12,6 @@ template ChunkSplitter() {
   // the splited chunk can have up to 4 bytes. The fifth item decides the length of the dynamic array
   signal output out[5];
 
-  signal conds[4];
-  conds[0] <== IsEqual()([chunk[3], 1]);
-  conds[1] <== IsEqual()([chunk[3], 2]);
-  conds[2] <== IsEqual()([chunk[3], 3]);
-  conds[3] <== IsEqual()([chunk[3], 0]);
-
   // chunk[0] >> 2
   signal val_1_0 <== RightShift(8, 2)(chunk[0]);
   // (chunk[0] & 3) << 4
@@ -41,6 +35,12 @@ template ChunkSplitter() {
   signal arr_2[5] <== [val_1_0, val_2_1, val_1_2, 0, 3];
   signal arr_3[5] <== [val_1_0, val_2_1, val_3_2, val_3_3, 4];
 
+  signal conds[4];
+  conds[0] <== IsEqual()([chunk[3], 1]);
+  conds[1] <== IsEqual()([chunk[3], 2]);
+  conds[2] <== IsEqual()([chunk[3], 3]);
+  conds[3] <== IsEqual()([chunk[3], 0]);
+
   signal c_3[5];
   signal c_3_i[5];
   signal c_2[5];
@@ -58,7 +58,7 @@ template ChunkSplitter() {
       }
     **/
     c_3[i] <== conds[2] * arr_3[i] + (1 - conds[2]);
-    c_3_i[i] <==  c_3[i] * (1 - conds[3]);
+    c_3_i[i] <== c_3[i] * (1 - conds[3]);
     c_2[i] <== conds[1] * arr_2[i] + (1 - conds[1]);
     c_2_i[i] <== c_2[i] * c_3_i[i];
     c_1[i] <== conds[0] * arr_1[i] + (1 - conds[0]);

@@ -75,10 +75,6 @@ template GetIndexForChar() {
   signal eq_1 <== IsEqual()([character, 45]);
   signal eq_2 <== IsEqual()([character, 95]);
 
-  // At least one of the condition above should be met. If not then it means that the character is invalid
-  signal valid_index <== GreaterThan(8)([r_1 + r_2 + r_3 + eq_1 + eq_2, 0]);
-  assert(valid_index);
-
   // inverse logic of what we did in `GetCharForIndex`
   signal c_5 <== eq_2 * 63 + (1 - eq_2);
   signal c_4 <== eq_1 * 62 + (1 - eq_1) * c_5;
