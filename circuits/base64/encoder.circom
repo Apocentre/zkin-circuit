@@ -85,7 +85,7 @@ template ChunkEncoder() {
 
     /**
       if i <= chunk_len {
-        out[i] <== chunk[i]
+        out[i] <== b64_chars[i]
       } if chunk_len == 0 {
         out[i] = null_char() 
       } else {
@@ -113,7 +113,7 @@ template Encoder(max_size, max_encoded_size, max_chunk_count) {
   signal len_arr[max_encoded_size + 1];
   len_arr[0] <== 0;
 
-  for(var i = 0; i < max_chunk_count; i++){
+  for(var i = 0; i < max_chunk_count; i++) {
     var start_index = i * 3;
 
     /// Our arrays have a fixed size, but not all items are values that we need. For example, an fixed array might
