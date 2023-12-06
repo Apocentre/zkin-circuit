@@ -51,14 +51,15 @@ template GetCharForIndex() {
     }
   **/
   signal c_5 <== eq_2 * 95 + (1 - eq_2);
-  signal c_4 <== eq_1 * 45 + (1 - eq_1) * c_5;
-  signal c_3 <== r_3 * (index - DIGITOFFSET) + (1 - r_3);
-  signal c_3_i <== c_3 * c_4;
-  signal c_2 <== r_2 * (index + LOWERCASEOFFSET) + (1 - r_2);
-  signal c_2_i <== c_2 * c_3_i;
-  signal c_1 <== r_1 * (index + UPPERCASEOFFSET) + (1 - r_1);
+  signal c_5_i <== (1 - eq_1) * c_5;
+  signal c_4 <== eq_1 * 45 + c_5_i;
+  signal c_4_i <== (1 - r_3) * c_4;
+  signal c_3 <== r_3 * (index - DIGITOFFSET) + c_4_i;
+  signal c_3_i <== (1 - r_2) * c_3;
+  signal c_2 <== r_2 * (index + LOWERCASEOFFSET) + c_3_i;
+  signal c_1 <== (1 - r_1) * c_2;
 
-  out <== c_1 * c_2_i;
+  out <== r_1 * (index + UPPERCASEOFFSET) + c_1;
 }
 
 template GetIndexForChar() {
@@ -77,14 +78,15 @@ template GetIndexForChar() {
 
   // inverse logic of what we did in `GetCharForIndex`
   signal c_5 <== eq_2 * 63 + (1 - eq_2);
-  signal c_4 <== eq_1 * 62 + (1 - eq_1) * c_5;
-  signal c_3 <== r_3 * (character + DIGITOFFSET) + (1 - r_3);
-  signal c_3_i <== c_3 * c_4;
-  signal c_2 <== r_2 * (character - LOWERCASEOFFSET) + (1 - r_2);
-  signal c_2_i <== c_2 * c_3_i;
-  signal c_1 <== r_1 * (character - UPPERCASEOFFSET) + (1 - r_1);
+  signal c_5_i <== (1 - eq_1) * c_5;
+  signal c_4 <== eq_1 * 62 + c_5_i;
+  signal c_4_i <== (1 - r_3) * c_4;
+  signal c_3 <== r_3 * (character + DIGITOFFSET) + c_4_i;
+  signal c_3_i <== (1 - r_2) * c_3;
+  signal c_2 <== r_2 * (character - LOWERCASEOFFSET) + c_3_i;
+  signal c_1 <== (1 - r_1) * c_2;
 
-  out <== c_1 * c_2_i;
+  out <== r_1 * (character - UPPERCASEOFFSET) + c_1;
 }
 
 function padding_char() {

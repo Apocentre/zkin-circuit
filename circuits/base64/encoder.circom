@@ -39,7 +39,6 @@ template ChunkSplitter() {
   conds[0] <== IsEqual()([chunk[3], 1]);
   conds[1] <== IsEqual()([chunk[3], 2]);
   conds[2] <== IsEqual()([chunk[3], 3]);
-  conds[3] <== IsEqual()([chunk[3], 0]);
 
   signal c_3[5];
   signal c_2[5];
@@ -60,6 +59,7 @@ template ChunkSplitter() {
     c_2_i[i] <== (1 - conds[1]) * c_3[i];
     c_2[i] <== conds[1] * arr_2[i] + c_2_i[i];
     c_1[i] <== (1 - conds[0]) * c_2[i];
+    
     out[i] <== conds[0] * arr_1[i] + c_1[i];
   }
 }

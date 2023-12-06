@@ -60,6 +60,7 @@ template ChunkSticher() {
     c_2[i] <== (1 - conds[1]) * c_3[i];
     c_2_i[i] <== conds[1] * arr_2[i] + c_2[i];
     c_1[i] <== (1 - conds[0]) * c_2_i[i];
+
     out[i] <== conds[0] * arr_1[i] + c_1[i];
   }
 }
@@ -128,6 +129,10 @@ template Decoder(max_size, max_encoded_size, max_chunk_count) {
   }
 
   out <== FilterZeros(max_size)(buffer);
+
+  for(var i = 0; i < max_size; i++) {
+    log(out[i]);
+  }
 }
 
 component main = Decoder(105, 140, 35);
