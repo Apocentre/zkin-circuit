@@ -39,13 +39,13 @@ template ChunkSticher() {
   );
 
   signal arr_1[4] <== [val_1_0, val_1_1, 0, 2];
-  signal arr_2[5] <== [val_1_0, val_2_1, val_2_2,  3];
-  signal arr_3[5] <== [val_1_0, val_2_1, val_3_1,  3];
+  signal arr_2[4] <== [val_1_0, val_2_1, val_2_2,  3];
+  signal arr_3[4] <== [val_1_0, val_2_1, val_3_1,  3];
 
-  signal c_3[5];
-  signal c_2[5];
-  signal c_2_i[5];
-  signal c_1[5];
+  signal c_3[4];
+  signal c_2[4];
+  signal c_2_i[4];
+  signal c_1[4];
 
   for(var i = 0; i < 4; i++) {
     /**
@@ -118,6 +118,14 @@ template Decoder(max_size, max_encoded_size, max_chunk_count) {
 
     chunk_decoders[i] = ChunkDecoder();
     chunk_decoders[i].chunk <== chunks[i];
+    stiches[i] = ChunkSticher();
+    stiches[i].chunk <== chunk_decoders[i].out;
+
+    for(var j = 0; j < 3; j++) {
+      var index = i * 3;
+      var j_index = index + j;
+      out[j_index] <== stiches[i].out[j];
+    }
   }
 }
 
