@@ -5,7 +5,6 @@ include "./Find.circom";
 
 /// Filtes all zeros from the given array. It moves them to the back of the out array. Similar to Filter but more
 /// more specific version where match is every other value except for 0s
-/// At the moment this works with max array size of 100 elements. 
 template FilterZeros(N) {
   signal input in[N];
   signal output out[N];
@@ -23,8 +22,7 @@ template FilterZeros(N) {
       find_non_zero[i].in <== nullify[i - 1].out;
     }
 
-    // TODO: atm we support arrays of 100 items thus 7 bits are enough.
-    index_check[i] <== LessThan(7)([find_non_zero[i].index, N]);
+    index_check[i] <== LessThan(8)([find_non_zero[i].index, N]);
     out[i] <== find_non_zero[i].value * index_check[i];
 
     // exclude found element by nullifyeamenting its value

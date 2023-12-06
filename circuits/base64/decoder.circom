@@ -126,6 +126,8 @@ template Decoder(max_size, max_encoded_size, max_chunk_count) {
       out[j_index] <== stiches[i].out[j];
     }
   }
+
+  // signal filter[10] <== FilterZeros(10)(in);
 }
 
 component main = Decoder(105, 140, 35);

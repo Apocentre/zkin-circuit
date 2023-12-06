@@ -5,8 +5,6 @@ include "./Find.circom";
 
 /// Filter all occurences of the given item from the input array. Fitlering essentially means moving all 
 /// matches to the end of the output array.
-
-// At the moment this works with max array size of 100 elements. 
 template Filter(N) {
   signal input in[N];
   signal input match; 
@@ -32,8 +30,7 @@ template Filter(N) {
     find[i].match <== match;
 
     // check if we found an occurence of the `match` item if there was a match, ft[i].index must be less than N.
-    // TODO: atm we support arrays of 100 items thus 7 bits are enough.
-    index_check[i] <== LessThan(7)([find[i].index, N]);
+    index_check[i] <== LessThan(8)([find[i].index, N]);
     out[i] <== match * index_check[i].out;
 
     // exclude found element by increamenting its value
