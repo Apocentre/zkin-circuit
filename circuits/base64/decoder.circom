@@ -12,12 +12,57 @@ template ChunkSticher() {
   // last item incudes the real len of the array
   signal output out[4];
 
-  signal conds[4];
-  conds[0] <== IsEqual()([chunk[3], 1]);
-  conds[1] <== IsEqual()([chunk[3], 2]);
-  conds[2] <== IsEqual()([chunk[3], 3]);
-  conds[3] <== IsEqual()([chunk[3], 0]);
+  signal conds[3];
+  conds[0] <== IsEqual()([chunk[3], 2]);
+  conds[1] <== IsEqual()([chunk[3], 3]);
+  conds[2] <== IsEqual()([chunk[3], 4]);
   var sum = conds[0] + conds[1] + conds[2];
+
+  // (chunk[0] & 63) << 2 | chunk[1] >> 4
+  signal val_1_0 <== Or(8)(
+    LeftShift(8, 2)(And(8)(chunk[0], 63)),
+    RightShift(8, 4)(chunk[1])
+  );
+  // (chunk[1] & 15) << 4
+  signal val_1_1 <== LeftShift(8, 4)(And(8)(chunk[1], 15));
+  // (chunk[1] & 15) << 4 | chunk[2] >> 2)
+  signal val_2_1 <== Or(8)(
+    LeftShift(8, 4)(And(8)(chunk[1], 15)),
+    RightShift(8, 2)(chunk[2])
+  );
+  // (chunk[2] & 3) << 6)
+  signal val_2_2 <== LeftShift(8, 6)(And(8)(chunk[2], 3));
+  // (chunk[2] & 3) << 6 | chunk[3] & 63)
+  signal val_3_1 <== Or(8)(
+    LeftShift(8, 6)(And(8)(chunk[2], 3)),
+    And(8)(chunk[3], 63)
+  );
+
+  signal arr_1[4] <== [val_1_0, val_1_1, 0, 2];
+  signal arr_2[5] <== [val_1_0, val_2_1, val_2_2,  3];
+  signal arr_3[5] <== [val_1_0, val_2_1, val_3_1,  3];
+
+  signal c_3[5];
+  signal c_2[5];
+  signal c_2_i[5];
+  signal c_1[5];
+
+  for(var i = 0; i < 4; i++) {
+    /**
+      if chunk_len == 2 {
+        out[i] = arr_1[i];
+      } else if chunk_len == 3 {
+        out[i] = arr_2[i];
+      } else if chunk_len == 4{
+        out[i] = arr_3[i];
+      }
+    **/
+    c_3[i] <== conds[2] * arr_3[i] + (1 - conds[2]);
+    c_2[i] <== conds[1] * arr_2[i] + (1 - conds[1]);
+    c_2_i[i] <== c_2[i] * c_3[i];
+    c_1[i] <== conds[0] * arr_1[i] + (1 - conds[0]);
+    out[i] <== c_1[i] * c_2_i[i];
+  }
 }
 
 template ChunkDecoder() {

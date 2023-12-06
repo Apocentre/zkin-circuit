@@ -17,7 +17,6 @@ template ChunkSplitter() {
   conds[1] <== IsEqual()([chunk[3], 2]);
   conds[2] <== IsEqual()([chunk[3], 3]);
   conds[3] <== IsEqual()([chunk[3], 0]);
-  var sum = conds[0] + conds[1] + conds[2];
 
   // chunk[0] >> 2
   signal val_1_0 <== RightShift(8, 2)(chunk[0]);
