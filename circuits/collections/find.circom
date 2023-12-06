@@ -25,14 +25,16 @@ template Find(N) {
   signal input in[N];
   signal input match;
   
-  signal match_index[N];
+  signal match_index[N + 1];
   match_index[0] <== N;
 
   signal eq[N];
 
-  for (var i = 0; i < N; i ++) {
+  for (var i = 0; i < N; i++) {
+    var rev_index = N - i - 1;
+
     eq[i] <== IsEqual()([in[i], match]);
-    match_index[i + 1] <== match_index[i] + eq[i] * (i - match_index[i]);
+    match_index[i + 1] <== match_index[i] + eq[i] * (rev_index - match_index[i]);
   }
 
   signal output index <== match_index[N];
@@ -66,10 +68,12 @@ template FindNonZero(N) {
 
   signal eq[N];
 
-  for (var i = 0; i < N; i ++) {
-    eq[i] <== NotEqual()([in[i], 0]);
-    match_index[i + 1] <== match_index[i] + eq[i] * (i - match_index[i]);
-    match_value[i + 1] <== match_value[i] + eq[i] * (in[i] - match_value[i]);
+  for (var i = 0; i < N; i++) {
+    var rev_index = N - i - 1;
+
+    eq[i] <== NotEqual()([in[rev_index], 0]);
+    match_index[i + 1] <== match_index[i] + eq[i] * (rev_index - match_index[i]);
+    match_value[i + 1] <== match_value[i] + eq[i] * (in[rev_index] - match_value[i]);
   }
 
   signal output value <== match_value[N];
