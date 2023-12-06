@@ -9,8 +9,7 @@ include "../math/bitwise.circom";
 
 template ChunkSticher() {
   signal input chunk[5];
-  // last item incudes the real len of the array
-  signal output out[4];
+  signal output out[3];
 
   signal conds[3];
   conds[0] <== IsEqual()([chunk[3], 2]);
@@ -38,16 +37,16 @@ template ChunkSticher() {
     And(8)(chunk[3], 63)
   );
 
-  signal arr_1[4] <== [val_1_0, val_1_1, 0, 2];
-  signal arr_2[4] <== [val_1_0, val_2_1, val_2_2,  3];
-  signal arr_3[4] <== [val_1_0, val_2_1, val_3_1,  3];
+  signal arr_1[3] <== [val_1_0, val_1_1, 0];
+  signal arr_2[3] <== [val_1_0, val_2_1, val_2_2];
+  signal arr_3[3] <== [val_1_0, val_2_1, val_3_1];
 
-  signal c_3[4];
-  signal c_2[4];
-  signal c_2_i[4];
-  signal c_1[4];
+  signal c_3[3];
+  signal c_2[3];
+  signal c_2_i[3];
+  signal c_1[3];
 
-  for(var i = 0; i < 4; i++) {
+  for(var i = 0; i < 3; i++) {
     /**
       if chunk_len == 2 {
         out[i] = arr_1[i];
