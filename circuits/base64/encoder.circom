@@ -84,7 +84,7 @@ template ChunkEncoder() {
     conds_2[i] <== IsEqual()([chunk_len, 0]);
 
     /**
-      if i <= chunk_len {
+      if i < chunk_len {
         out[i] <== b64_chars[i]
       } if chunk_len == 0 {
         out[i] = null_char() 
@@ -92,7 +92,7 @@ template ChunkEncoder() {
         out[i] = padding_char() 
       }
     */
-    c_1[i] <==  conds_2[i] * null_char() + (1 - conds_2[i]) * padding_char();
+    c_1[i] <== conds_2[i] * null_char() + (1 - conds_2[i]) * padding_char();
     c_2[i] <== (1 - conds_1[i]) * c_1[i];
     out[i] <== conds_1[i] * b64_chars[i] + c_2[i];
   }

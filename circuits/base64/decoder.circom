@@ -7,32 +7,43 @@ include "../utils/constants.circom";
 include "../math/aggregation.circom";
 include "../math/bitwise.circom";
 
+template ChunkSticher() {
+  signal input chunk[5];
+  // last item incudes the real len of the array
+  signal output out[4];
+
+  signal conds[4];
+  conds[0] <== IsEqual()([chunk[3], 1]);
+  conds[1] <== IsEqual()([chunk[3], 2]);
+  conds[2] <== IsEqual()([chunk[3], 3]);
+  conds[3] <== IsEqual()([chunk[3], 0]);
+  var sum = conds[0] + conds[1] + conds[2];
+}
+
 template ChunkDecoder() {
   signal input chunk[5];
-  signal output out[4];
+  signal output out[5];
   var chunk_len = chunk[4];
 
   signal b64_indexes[4];
   signal conds_1[4];
-  signal conds_2[4];
   signal c_1[4];
-  signal c_2[4];
+  var len = 0;
 
   for(var i = 0; i < 4; i++) {
     b64_indexes[i] <== GetIndexForChar()(chunk[i]);
     conds_1[i] <== LessThan(8)([i, chunk_len]);
-    conds_2[i] <== IsEqual()([chunk_len, 0]);
+    len += conds_1[i];
 
     /**
-      if i <= chunk_len {
+      if i < chunk_len {
         out[i] <== b64_indexes[i]
-      } if chunk_len == 0 {
+      } else {
         out[i] = null_char() 
       }
     */
-    c_1[i] <==  conds_2[i] * null_char();
-    c_2[i] <== (1 - conds_1[i]) * c_1[i];
-    out[i] <== conds_1[i] * b64_indexes[i] + c_2[i];
+    c_1[i] <== (1 - conds_1[i]) * null_char();
+    out[i] <== conds_1[i] * b64_indexes[i] + c_1[i];
   }
 }
 
