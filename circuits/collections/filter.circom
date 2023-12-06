@@ -37,7 +37,7 @@ template Filter(N) {
     out[i] <== match * index_check[i].out;
 
     // exclude found element by increamenting its value
-    incr[i] = IncrementValueInTuple(N, 0);
+    incr[i] = IncrementValueInTuple(N);
 
     // same logic like what we did above with find
     if (i == 0) {		

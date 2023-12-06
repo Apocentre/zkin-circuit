@@ -8,18 +8,17 @@ include "../utils/not_equal.circom";
 template IncrementValue(N) {
   signal input in[N];
   signal input index;
-  signal output out[N][2];
+  signal output out[N];
 
   signal eq[N];
 
   for (var i = 0; i < N; i++) {
-		eq[i] = IsEqual([i, index]);
+		eq[i] = IsEqual()([i, index]);
 
     // increment the value at Index if i == index
 		out[i] <== in[i] + eq[i];
 	}
 }
-
 
 /// Returns the index of the last item found in this array
 template Find(N) {
@@ -32,7 +31,7 @@ template Find(N) {
   signal eq[N];
 
   for (var i = 0; i < N; i ++) {
-    eq[i] <== IsEqual([in[i], match]);
+    eq[i] <== IsEqual()([in[i], match]);
     match_index[i + 1] <== match_index[i] + eq[i] * (i - match_index[i]);
   }
 
@@ -43,12 +42,12 @@ template Find(N) {
 template NullifyElementAtIndex(N) {
   signal input in[N];
   signal input index;
-  signal output out[N][2];
+  signal output out[N];
 
   signal eq[N];
 
   for (var i = 0; i < N; i++) {
-		eq[i] = IsEqual([i, index]);
+		eq[i] <== IsEqual()([i, index]);
 
     // set value to 0 at index
 		out[i] <== (1 - eq[i]) * in[i];
@@ -59,16 +58,21 @@ template NullifyElementAtIndex(N) {
 template FindNonZero(N) {
   signal input in[N];
   
-  signal match_index[N];
+  signal match_index[N + 1];
+  signal match_value[N + 1];
+
   match_index[0] <== N;
+  match_value[0] <== 0;
 
   signal eq[N];
 
   for (var i = 0; i < N; i ++) {
-    eq[i] <== NotEqual([in[i], 0]);
+    eq[i] <== NotEqual()([in[i], 0]);
     match_index[i + 1] <== match_index[i] + eq[i] * (i - match_index[i]);
+    match_value[i + 1] <== match_value[i] + eq[i] * (in[i] - match_value[i]);
   }
 
+  signal output value <== match_value[N];
   signal output index <== match_index[N];
 }
 
