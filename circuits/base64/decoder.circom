@@ -4,7 +4,7 @@ include "../../node_modules/circomlib/circuits/comparators.circom";
 include "../utils/not_equal.circom";
 include "./lookup_table.circom";
 include "../utils/constants.circom";
-include "../math/aggregation.circom";
+include "../collections/filter_zeros.circom";
 include "../math/bitwise.circom";
 
 template ChunkSticher() {
@@ -96,7 +96,7 @@ template ChunkDecoder() {
 template Decoder(max_size, max_encoded_size, max_chunk_count) {
   signal input value[max_encoded_size];
   signal output out[max_size];
-  signal output len;
+  signal output buffer[max_size];
 
   signal chunks[max_chunk_count][5];
   signal has_value_conds[max_chunk_count][4];
@@ -123,11 +123,11 @@ template Decoder(max_size, max_encoded_size, max_chunk_count) {
     for(var j = 0; j < 3; j++) {
       var index = i * 3;
       var j_index = index + j;
-      out[j_index] <== stiches[i].out[j];
+      buffer[j_index] <== stiches[i].out[j];
     }
   }
 
-  // signal filter[10] <== FilterZeros(10)(in);
+  out <== FilterZeros(max_size)(buffer);
 }
 
 component main = Decoder(105, 140, 35);
