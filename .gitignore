@@ -13,3 +13,4 @@ artifacts/
 build
 contracts
 test_build
+.DevNotes.md
