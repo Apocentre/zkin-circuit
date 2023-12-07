@@ -5,6 +5,7 @@ include "../math/integer_div.circom";
 
 template SegmentSearch(jwt_chunk_size) {
   signal input segment_index;
+  signal input jwt_0[jwt_chunk_size];
   signal input jwt_1[jwt_chunk_size];
   signal input jwt_2[jwt_chunk_size];
   signal input jwt_3[jwt_chunk_size];
@@ -14,10 +15,10 @@ template SegmentSearch(jwt_chunk_size) {
   signal input jwt_7[jwt_chunk_size];
   signal input jwt_8[jwt_chunk_size];
   signal input jwt_9[jwt_chunk_size];
-  signal input jwt_10[jwt_chunk_size];
   signal output out[jwt_chunk_size];
 
   /// find first segment
+  signal seg_0_eq <== IsEqual()([segment_index, 0]);
   signal seg_1_eq <== IsEqual()([segment_index, 1]);
   signal seg_2_eq <== IsEqual()([segment_index, 2]);
   signal seg_3_eq <== IsEqual()([segment_index, 3]);
@@ -29,8 +30,6 @@ template SegmentSearch(jwt_chunk_size) {
   signal seg_9_eq <== IsEqual()([segment_index, 9]);
   signal seg_10_eq <== IsEqual()([segment_index, 10]);
 
-
-  signal c_10[jwt_chunk_size]; signal c_10_i[jwt_chunk_size];
   signal c_9[jwt_chunk_size]; signal c_9_i[jwt_chunk_size];
   signal c_8[jwt_chunk_size]; signal c_8_i[jwt_chunk_size];
   signal c_7[jwt_chunk_size]; signal c_7_i[jwt_chunk_size];
@@ -40,18 +39,17 @@ template SegmentSearch(jwt_chunk_size) {
   signal c_3[jwt_chunk_size]; signal c_3_i[jwt_chunk_size];
   signal c_2[jwt_chunk_size]; signal c_2_i[jwt_chunk_size];
   signal c_1[jwt_chunk_size]; signal c_1_i[jwt_chunk_size];
+  signal c_0[jwt_chunk_size]; signal c_0_i[jwt_chunk_size];
 
   for(var i = 0; i < jwt_chunk_size; i++) {
     /*
       if(segment_index == 1) {
-        out <== jwt_1
+        out <== jwt_0
       } else if(segment_index == 2) {
         ....
       }
     **/
-    c_10[i] <== seg_10_eq * jwt_10[i];
-    c_9_i[i] <== (1 - seg_9_eq) * c_10[i];
-    c_9[i] <== seg_9_eq * jwt_9[i] + c_9_i[i];
+    c_9[i] <== seg_9_eq * jwt_9[i];
     c_8_i[i] <== (1 - seg_8_eq) * c_9[i];
     c_8[i] <== seg_8_eq * jwt_8[i] + c_8_i[i];
     c_7_i[i] <== (1 - seg_7_eq) * c_8[i];
@@ -68,6 +66,8 @@ template SegmentSearch(jwt_chunk_size) {
     c_2[i] <== seg_2_eq * jwt_2[i] + c_2_i[i];
     c_1_i[i] <== (1 - seg_1_eq) * c_2[i];
     c_1[i] <== seg_1_eq * jwt_1[i] + c_1_i[i];
+    c_0_i[i] <== (1 - seg_0_eq) * c_1[i];
+    c_0[i] <== seg_0_eq * jwt_0[i] + c_0_i[i];
     
     out[i] <== c_1[i];
   }
@@ -80,6 +80,7 @@ template SegmentSearch(jwt_chunk_size) {
 /// base64 encoded values of max length `jwt_chunk_size` which most likely be 100. So we know that the encoded value
 /// will at most span across 2 of the below segments.
 template JwtSlice(jwt_chunk_size) {
+  signal input jwt_0[jwt_chunk_size];
   signal input jwt_1[jwt_chunk_size];
   signal input jwt_2[jwt_chunk_size];
   signal input jwt_3[jwt_chunk_size];
@@ -89,30 +90,28 @@ template JwtSlice(jwt_chunk_size) {
   signal input jwt_7[jwt_chunk_size];
   signal input jwt_8[jwt_chunk_size];
   signal input jwt_9[jwt_chunk_size];
-  signal input jwt_10[jwt_chunk_size];
   signal input start;
   signal input end;
 
   signal output out[jwt_chunk_size * 2];
   signal output first_segment_index;
 
-  first_segment_index <==  IntegerDivision(10)(start, jwt_chunk_size);
-  signal end_segment_index <==  IntegerDivision(10)(end, jwt_chunk_size);
+  first_segment_index <== IntegerDivision(10)(start, jwt_chunk_size);
+  signal end_segment_index <== IntegerDivision(10)(end, jwt_chunk_size);
 
   /// Find the two segments
   signal segment_1[jwt_chunk_size] <== SegmentSearch(jwt_chunk_size)(
-    first_segment_index, jwt_1, jwt_2, jwt_3, jwt_4, jwt_5, jwt_6, jwt_7, jwt_8, jwt_9, jwt_10
+    first_segment_index, jwt_0, jwt_1, jwt_2, jwt_3, jwt_4, jwt_5, jwt_6, jwt_7, jwt_8, jwt_9
   );
   signal segment_2[jwt_chunk_size] <== SegmentSearch(jwt_chunk_size)(
-    end_segment_index, jwt_1, jwt_2, jwt_3, jwt_4, jwt_5, jwt_6, jwt_7, jwt_8, jwt_9, jwt_10
+    end_segment_index, jwt_0, jwt_1, jwt_2, jwt_3, jwt_4, jwt_5, jwt_6, jwt_7, jwt_8, jwt_9
   );
 
   // Note that the two segments might be the same a thus the concated output will essentially have the same slice twice
   // Our output has to have jwt_chunk_size * 2 lenth since we can have values that might span two such segments. And since
   // the final length must be a fixed value we have to copy the same values twice if start_index_segment == end_index_segment
   for(var i = 0; i < jwt_chunk_size; i++) {
-    var index = i * 2;
-    out[index] <== segment_1[i];
-    out[index + 1] <== segment_2[i];
+    out[i] <== segment_1[i];
+    out[i + jwt_chunk_size] <== segment_2[i];
   }
 }

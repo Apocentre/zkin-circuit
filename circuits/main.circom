@@ -12,6 +12,7 @@ template ZkAuth(
   jwt_chunk_size
 ) {
   /// We split jwt into 10 chunks of jwt_chunk_size
+  signal input jwt_0[jwt_chunk_size];
   signal input jwt_1[jwt_chunk_size];
   signal input jwt_2[jwt_chunk_size];
   signal input jwt_3[jwt_chunk_size];
@@ -21,7 +22,6 @@ template ZkAuth(
   signal input jwt_7[jwt_chunk_size];
   signal input jwt_8[jwt_chunk_size];
   signal input jwt_9[jwt_chunk_size];
-  signal input jwt_10[jwt_chunk_size];
 
   signal input iss[max_claim_size];
   signal input sub[max_claim_size];
@@ -33,7 +33,7 @@ template ZkAuth(
   signal jwt_slice_iss[jwt_chunk_size * 2];
   signal first_segment;
   (jwt_slice_iss, first_segment) <== JwtSlice(jwt_chunk_size)(
-    jwt_1, jwt_2, jwt_3, jwt_4, jwt_5, jwt_6, jwt_7, jwt_8, jwt_9, jwt_10, iss_loc, iss_loc + jwt_chunk_size
+    jwt_0, jwt_1, jwt_2, jwt_3, jwt_4, jwt_5, jwt_6, jwt_7, jwt_8, jwt_9, iss_loc, iss_loc + jwt_chunk_size
   );
   
   component iss_jwt_inclusion = JwtInclusion(
@@ -51,17 +51,17 @@ template ZkAuth(
   // var segment = iss_loc / jwt_chunk_size;
   iss_jwt_inclusion.claim_loc <== iss_loc - (first_segment * jwt_chunk_size); // i.e. iss_loc % jwt_chunk_size
 
-  // component sub_jwt_inclusion = JwtInclusion(
-  //   max_claim_size,
-  //   max_encoded_claim_size,
-  //   max_chunk_count,
-  //   max_jwt_size,
-  //   1
-  // );
+  component sub_jwt_inclusion = JwtInclusion(
+    max_claim_size,
+    max_encoded_claim_size,
+    max_chunk_count,
+    max_jwt_size,
+    1
+  );
 
-  // sub_jwt_inclusion.jwt <== jwt;
-  // sub_jwt_inclusion.claim <== sub;
-  // sub_jwt_inclusion.claim_loc <== sub_loc;
+  sub_jwt_inclusion.jwt <== jwt;
+  sub_jwt_inclusion.claim <== sub;
+  sub_jwt_inclusion.claim_loc <== sub_loc;
 
   // // Decoder uses slightly but predictably different max_lengths from the encoder. The reason is that encoder works
   // // with chunks of 3 but decoder with chunks of 4 so we want max_lengths to be divisible by these numbers
