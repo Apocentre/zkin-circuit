@@ -2,7 +2,7 @@ pragma circom 2.1.6;
 
 include "../../node_modules/circomlib/circuits/comparators.circom";
 
-template SegmentSearch() {
+template SegmentSearch(jwt_chunk_size) {
   signal input segment_index;
   signal input jwt_1[jwt_chunk_size];
   signal input jwt_2[jwt_chunk_size];
@@ -17,16 +17,16 @@ template SegmentSearch() {
   signal output out[jwt_chunk_size];
 
   /// find first segment
-  signal seg_1_eq <== IsEqual()([start_index_segment, 1]);
-  signal seg_2_eq <== IsEqual()([start_index_segment, 2]);
-  signal seg_3_eq <== IsEqual()([start_index_segment, 3]);
-  signal seg_4_eq <== IsEqual()([start_index_segment, 4]);
-  signal seg_5_eq <== IsEqual()([start_index_segment, 5]);
-  signal seg_6_eq <== IsEqual()([start_index_segment, 6]);
-  signal seg_7_eq <== IsEqual()([start_index_segment, 7]);
-  signal seg_8_eq <== IsEqual()([start_index_segment, 8]);
-  signal seg_9_eq <== IsEqual()([start_index_segment, 9]);
-  signal seg_10_eq <== IsEqual()([start_index_segment, 10]);
+  signal seg_1_eq <== IsEqual()([segment_index, 1]);
+  signal seg_2_eq <== IsEqual()([segment_index, 2]);
+  signal seg_3_eq <== IsEqual()([segment_index, 3]);
+  signal seg_4_eq <== IsEqual()([segment_index, 4]);
+  signal seg_5_eq <== IsEqual()([segment_index, 5]);
+  signal seg_6_eq <== IsEqual()([segment_index, 6]);
+  signal seg_7_eq <== IsEqual()([segment_index, 7]);
+  signal seg_8_eq <== IsEqual()([segment_index, 8]);
+  signal seg_9_eq <== IsEqual()([segment_index, 9]);
+  signal seg_10_eq <== IsEqual()([segment_index, 10]);
 
 
   signal c_3[jwt_chunk_size];
@@ -35,6 +35,13 @@ template SegmentSearch() {
   signal c_1[jwt_chunk_size];
 
   for(var i = 0; i < jwt_chunk_size; i++) {
+    /*
+      if(segment_index == 1) {
+        out <== jwt_1
+      } else if(segment_index == 2) {
+        ....
+      }
+    **/
     c_10[i] <== seg_10_eq * jwt_10[i]
     c_9_i[i] <== (1 - seg_9_eq) * c_10;
     c_9[i] <== seg_9_eq * jwt_9[i] + c_9_i;
@@ -54,6 +61,8 @@ template SegmentSearch() {
     c_2[i] <== seg_2_eq * jwt_2[i] + c_2_i;
     c_1_i[i] <== (1 - seg_1_eq) * c_2;
     c_1[i] <== seg_1_eq * jwt_1[i] + c_1_i;
+    
+    out[i] <== c_1[i];
   }
 }
 
@@ -77,6 +86,25 @@ template JwtSlice(jwt_chunk_size) {
   signal input start;
   signal input end;
 
+  signal output out[jwt_chunk_size * 2];
+
   signal start_index_segment <== start / jwt_chunk_size;
   signal end_index_segment <== end / jwt_chunk_size;
+
+  /// Find the two segments
+  signal segment_1 = SegmentSearch(jwt_chunk_size)(
+    start_index_segment, jwt_1, jwt_2, jwt_3, jwt_4, jwt_5, jwt_6, jwt_7, jwt_8, jwt_9, jwt_10
+  );
+  signal segment_1 = SegmentSearch(jwt_chunk_size)(
+    end_index_segment, jwt_1, jwt_2, jwt_3, jwt_4, jwt_5, jwt_6, jwt_7, jwt_8, jwt_9, jwt_10
+  );
+
+  // Note that the two segments might be the same a thus the concated output will essentially have the same slice twice
+  // Our output has to have jwt_chunk_size * 2 lenth since we can have values that might span two such segments. And since
+  // the final length must be a fixed value we have to copy the same values twice if start_index_segment == end_index_segment
+  for(var i = 0; i < jwt_chunk_size; i++) {
+    var index = i * 2;
+    out[index] <== segment_1[i];
+    out[index] <== segment_2[i];
+  }
 }
