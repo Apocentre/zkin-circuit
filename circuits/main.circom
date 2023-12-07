@@ -53,10 +53,8 @@ template ZkAuth(
   nonce_extractor.jwt <== jwt;
   nonce_extractor.value_loc <== nonce_loc;
   nonce_extractor.value_len <== nonce_len;
-
-  for(var i = 0; i < max_claim_size + 3; i++) {
-    log(nonce_extractor.out[i]);
-  }
+  // TODO: nonce_extractor.out might have an offset i.e. we would need to remove either 1 or 2 values to
+  // be able to use this value in later operations.
 }
 
 
