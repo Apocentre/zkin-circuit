@@ -84,17 +84,6 @@ template ZkAuth(
 
   // TODO: aud_extractor.out might have an offset i.e. we would need to remove either 1 or 2 values to
   // be able to use this value in later operations.
-
-  // 4. Extract alg from header
-  component alg_extractor = ClaimExtractor(
-    max_claim_size,
-    max_encoded_claim_size + 100, // header can be longer than the other ones
-    max_chunk_count,
-    jwt_chunk_size * 2
-  );
-  alg_extractor.jwt <== ConcatJwtSegments(jwt_chunk_size)(jwt_segments[0], jwt_segments[1]);
-  alg_extractor.value_loc <== alg_loc;
-  alg_extractor.value_len <== alg_len;
 }
 
 
