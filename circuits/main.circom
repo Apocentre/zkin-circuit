@@ -2,6 +2,7 @@ pragma circom 2.1.6;
 
 include "./jwt/inclusion.circom";
 include "./jwt/claim_extractor.circom";
+// include "./jwt/header_extractor.circom";
 include "./jwt/jwt_slice.circom";
 include "./math/integer_div.circom";
 
@@ -12,16 +13,7 @@ template ZkAuth(
   jwt_chunk_size
 ) {
   /// We split jwt into 10 chunks of jwt_chunk_size
-  signal input jwt_0[jwt_chunk_size];
-  signal input jwt_1[jwt_chunk_size];
-  signal input jwt_2[jwt_chunk_size];
-  signal input jwt_3[jwt_chunk_size];
-  signal input jwt_4[jwt_chunk_size];
-  signal input jwt_5[jwt_chunk_size];
-  signal input jwt_6[jwt_chunk_size];
-  signal input jwt_7[jwt_chunk_size];
-  signal input jwt_8[jwt_chunk_size];
-  signal input jwt_9[jwt_chunk_size];
+  signal input jwt_segments[10][jwt_chunk_size];
 
   signal input iss[max_claim_size];
   signal input sub[max_claim_size];
@@ -36,9 +28,7 @@ template ZkAuth(
   // 1. Prove iss is included in the jwt token
   signal jwt_slice_iss[jwt_chunk_size * 2];
   signal iss_first_segment;
-  (jwt_slice_iss, iss_first_segment) <== JwtSlice(jwt_chunk_size)(
-    jwt_0, jwt_1, jwt_2, jwt_3, jwt_4, jwt_5, jwt_6, jwt_7, jwt_8, jwt_9, iss_loc, iss_loc + jwt_chunk_size
-  );
+  (jwt_slice_iss, iss_first_segment) <== JwtSlice(jwt_chunk_size)(jwt_segments, iss_loc, iss_loc + jwt_chunk_size);
   
   component iss_jwt_inclusion = JwtInclusion(
     max_claim_size,
@@ -58,9 +48,7 @@ template ZkAuth(
   // 2. Prove sub is included in the jwt token
   signal sub_slice_iss[jwt_chunk_size * 2];
   signal sub_first_segment;
-  (sub_slice_iss, sub_first_segment) <== JwtSlice(jwt_chunk_size)(
-    jwt_0, jwt_1, jwt_2, jwt_3, jwt_4, jwt_5, jwt_6, jwt_7, jwt_8, jwt_9, sub_loc, sub_loc + jwt_chunk_size
-  );
+  (sub_slice_iss, sub_first_segment) <== JwtSlice(jwt_chunk_size)(jwt_segments, sub_loc, sub_loc + jwt_chunk_size);
   
   component sub_jwt_inclusion = JwtInclusion(
     max_claim_size,
@@ -77,9 +65,7 @@ template ZkAuth(
   // 3. Extract and decode just the aud part from the jwt token
   signal aud_slice_iss[jwt_chunk_size * 2];
   signal aud_first_segment;
-  (aud_slice_iss, aud_first_segment) <== JwtSlice(jwt_chunk_size)(
-    jwt_0, jwt_1, jwt_2, jwt_3, jwt_4, jwt_5, jwt_6, jwt_7, jwt_8, jwt_9, aud_loc, aud_loc + aud_len
-  );
+  (aud_slice_iss, aud_first_segment) <== JwtSlice(jwt_chunk_size)(jwt_segments, aud_loc, aud_loc + aud_len);
   
   // Decoder uses slightly but predictably different max_lengths from the encoder. The reason is that encoder works
   // with chunks of 3 but decoder with chunks of 4 so we want max_lengths to be divisible by these numbers
@@ -104,6 +90,7 @@ template ZkAuth(
   //   max_chunk_count,
   //   jwt_chunk_size * 2
   // );
+  // aud_extractor <== ConcatJwtSegments(jwt_chunk_size)(jwt_0, jwt_1);
 }
 
 

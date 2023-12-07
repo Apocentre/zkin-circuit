@@ -4,17 +4,8 @@ include "../../node_modules/circomlib/circuits/comparators.circom";
 include "../math/integer_div.circom";
 
 template SegmentSearch(jwt_chunk_size) {
+  signal input jwt_segments[10][jwt_chunk_size];
   signal input segment_index;
-  signal input jwt_0[jwt_chunk_size];
-  signal input jwt_1[jwt_chunk_size];
-  signal input jwt_2[jwt_chunk_size];
-  signal input jwt_3[jwt_chunk_size];
-  signal input jwt_4[jwt_chunk_size];
-  signal input jwt_5[jwt_chunk_size];
-  signal input jwt_6[jwt_chunk_size];
-  signal input jwt_7[jwt_chunk_size];
-  signal input jwt_8[jwt_chunk_size];
-  signal input jwt_9[jwt_chunk_size];
   signal output out[jwt_chunk_size];
 
   /// find first segment
@@ -49,25 +40,25 @@ template SegmentSearch(jwt_chunk_size) {
         ....
       }
     **/
-    c_9[i] <== seg_9_eq * jwt_9[i];
+    c_9[i] <== seg_9_eq * jwt_segments[9][i];
     c_8_i[i] <== (1 - seg_8_eq) * c_9[i];
-    c_8[i] <== seg_8_eq * jwt_8[i] + c_8_i[i];
+    c_8[i] <== seg_8_eq * jwt_segments[8][i] + c_8_i[i];
     c_7_i[i] <== (1 - seg_7_eq) * c_8[i];
-    c_7[i] <== seg_7_eq * jwt_7[i] + c_7_i[i];
+    c_7[i] <== seg_7_eq * jwt_segments[7][i] + c_7_i[i];
     c_6_i[i] <== (1 - seg_6_eq) * c_7[i];
-    c_6[i] <== seg_6_eq * jwt_6[i] + c_6_i[i];
+    c_6[i] <== seg_6_eq * jwt_segments[6][i] + c_6_i[i];
     c_5_i[i] <== (1 - seg_5_eq) * c_6[i];
-    c_5[i] <== seg_5_eq * jwt_5[i] + c_5_i[i];
+    c_5[i] <== seg_5_eq * jwt_segments[5][i] + c_5_i[i];
     c_4_i[i] <== (1 - seg_4_eq) * c_5[i];
-    c_4[i] <== seg_4_eq * jwt_4[i] + c_4_i[i];
+    c_4[i] <== seg_4_eq * jwt_segments[4][i] + c_4_i[i];
     c_3_i[i] <== (1 - seg_3_eq) * c_4[i];
-    c_3[i] <== seg_3_eq * jwt_3[i] + c_3_i[i];
+    c_3[i] <== seg_3_eq * jwt_segments[3][i] + c_3_i[i];
     c_2_i[i] <== (1 - seg_2_eq) * c_3[i];
-    c_2[i] <== seg_2_eq * jwt_2[i] + c_2_i[i];
+    c_2[i] <== seg_2_eq * jwt_segments[2][i] + c_2_i[i];
     c_1_i[i] <== (1 - seg_1_eq) * c_2[i];
-    c_1[i] <== seg_1_eq * jwt_1[i] + c_1_i[i];
+    c_1[i] <== seg_1_eq * jwt_segments[1][i] + c_1_i[i];
     c_0_i[i] <== (1 - seg_0_eq) * c_1[i];
-    c_0[i] <== seg_0_eq * jwt_0[i] + c_0_i[i];
+    c_0[i] <== seg_0_eq * jwt_segments[0][i] + c_0_i[i];
     
     out[i] <== c_1[i];
   }
@@ -95,16 +86,7 @@ template ConcatJwtSegments(jwt_chunk_size) {
 /// base64 encoded values of max length `jwt_chunk_size` which most likely be 100. So we know that the encoded value
 /// will at most span across 2 of the below segments.
 template JwtSlice(jwt_chunk_size) {
-  signal input jwt_0[jwt_chunk_size];
-  signal input jwt_1[jwt_chunk_size];
-  signal input jwt_2[jwt_chunk_size];
-  signal input jwt_3[jwt_chunk_size];
-  signal input jwt_4[jwt_chunk_size];
-  signal input jwt_5[jwt_chunk_size];
-  signal input jwt_6[jwt_chunk_size];
-  signal input jwt_7[jwt_chunk_size];
-  signal input jwt_8[jwt_chunk_size];
-  signal input jwt_9[jwt_chunk_size];
+  signal input jwt_segments[10][jwt_chunk_size];
   signal input start;
   signal input end;
 
@@ -115,12 +97,8 @@ template JwtSlice(jwt_chunk_size) {
   signal end_segment_index <== IntegerDivision(10)(end, jwt_chunk_size);
 
   /// Find the two segments
-  signal segment_1[jwt_chunk_size] <== SegmentSearch(jwt_chunk_size)(
-    first_segment_index, jwt_0, jwt_1, jwt_2, jwt_3, jwt_4, jwt_5, jwt_6, jwt_7, jwt_8, jwt_9
-  );
-  signal segment_2[jwt_chunk_size] <== SegmentSearch(jwt_chunk_size)(
-    end_segment_index, jwt_0, jwt_1, jwt_2, jwt_3, jwt_4, jwt_5, jwt_6, jwt_7, jwt_8, jwt_9
-  );
+  signal segment_1[jwt_chunk_size] <== SegmentSearch(jwt_chunk_size)(jwt_segments, first_segment_index);
+  signal segment_2[jwt_chunk_size] <== SegmentSearch(jwt_chunk_size)(jwt_segments, end_segment_index);
 
   out <== ConcatJwtSegments(jwt_chunk_size)(segment_1, segment_2);
 }
