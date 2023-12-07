@@ -27,7 +27,6 @@ template Slice(N, pad) {
 
   // Require that start >= 0
   signal start_cond <== GreaterEqThan(10)([start, 0]);
-  // start_cond.in <== [start, 0];
   start_cond === 1;
 
   // Require that end < N
@@ -49,5 +48,14 @@ template Slice(N, pad) {
 
     // Set 0 to indexes outside the range. If inside the set the value at index taken from selections[i]
     out[i] <== selections[i] * rangeChecks[i] + pads[i];
+  }
+}
+
+template SliceFromStart(N, M, pad) {
+  signal input arr[N];
+  signal output out[M];
+
+  for(var i = 0; i < M; i++) {
+    out[i] <== arr[i];
   }
 }

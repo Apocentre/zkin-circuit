@@ -73,6 +73,21 @@ template SegmentSearch(jwt_chunk_size) {
   }
 }
 
+template ConcatJwtSegments(jwt_chunk_size) {
+  signal input segment_1[jwt_chunk_size];
+  signal input segment_2[jwt_chunk_size];
+
+  signal output out[jwt_chunk_size * 2];
+
+  // Note that the two segments might be the same a thus the concated output will essentially have the same slice twice
+  // Our output has to have jwt_chunk_size * 2 lenth since we can have values that might span two such segments. And since
+  // the final length must be a fixed value we have to copy the same values twice if start_index_segment == end_index_segment
+  for(var i = 0; i < jwt_chunk_size; i++) {
+    out[i] <== segment_1[i];
+    out[i + jwt_chunk_size] <== segment_2[i];
+  }
+}
+
 /// For optimization reasons we split the jwt into 10 smaller parts each having one segment of. These
 /// parts are in the order as the bytes appear in the origin JWT byte array.
 /// This circuit will accept all jwt segments, as well as, the start index and end index that correspons to the
@@ -107,11 +122,5 @@ template JwtSlice(jwt_chunk_size) {
     end_segment_index, jwt_0, jwt_1, jwt_2, jwt_3, jwt_4, jwt_5, jwt_6, jwt_7, jwt_8, jwt_9
   );
 
-  // Note that the two segments might be the same a thus the concated output will essentially have the same slice twice
-  // Our output has to have jwt_chunk_size * 2 lenth since we can have values that might span two such segments. And since
-  // the final length must be a fixed value we have to copy the same values twice if start_index_segment == end_index_segment
-  for(var i = 0; i < jwt_chunk_size; i++) {
-    out[i] <== segment_1[i];
-    out[i + jwt_chunk_size] <== segment_2[i];
-  }
+  out <== ConcatJwtSegments(jwt_chunk_size)(segment_1, segment_2);
 }

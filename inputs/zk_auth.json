@@ -18,5 +18,5 @@
   "sub_padded": 1,
   "aud_loc": "315",
   "aud_len": "28",
-  "aud_padded": 0
+  "aud_offset": 0
 }

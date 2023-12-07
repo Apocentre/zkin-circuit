@@ -1,7 +1,7 @@
 pragma circom 2.1.6;
 
 include "./jwt/inclusion.circom";
-include "./jwt/extractor.circom";
+include "./jwt/claim_extractor.circom";
 include "./jwt/jwt_slice.circom";
 include "./math/integer_div.circom";
 
@@ -31,7 +31,7 @@ template ZkAuth(
   signal input sub_padded;
   signal input aud_loc;
   signal input aud_len;
-  signal input aud_padded;
+  signal input aud_offset;
 
   // 1. Prove iss is included in the jwt token
   signal jwt_slice_iss[jwt_chunk_size * 2];
@@ -83,7 +83,7 @@ template ZkAuth(
   
   // Decoder uses slightly but predictably different max_lengths from the encoder. The reason is that encoder works
   // with chunks of 3 but decoder with chunks of 4 so we want max_lengths to be divisible by these numbers
-  component aud_extractor = JwtExtractor(
+  component aud_extractor = ClaimExtractor(
     max_claim_size,
     max_encoded_claim_size,
     max_chunk_count,
@@ -96,6 +96,14 @@ template ZkAuth(
 
   // TODO: aud_extractor.out might have an offset i.e. we would need to remove either 1 or 2 values to
   // be able to use this value in later operations.
+
+  // 4. Decode header
+  // component aud_extractor = HeaderExtractor(
+  //   max_claim_size,
+  //   max_encoded_claim_size + 100, // header can be longer than the other ones
+  //   max_chunk_count,
+  //   jwt_chunk_size * 2
+  // );
 }
 
 
