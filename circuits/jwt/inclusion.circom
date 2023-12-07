@@ -10,12 +10,12 @@ template JwtInclusion(
   max_claim_size,
   max_encoded_claim_size,
   max_chunk_count,
-  jwt_segment_len,
-  has_padding
+  jwt_segment_len
 ) {
   signal input jwt[jwt_segment_len];
   signal input claim[max_claim_size];
   signal input claim_loc;
+  signal input has_padding;
   
   // base64 encode the claim 
   component encoder = Encoder(max_claim_size, max_encoded_claim_size, max_chunk_count);

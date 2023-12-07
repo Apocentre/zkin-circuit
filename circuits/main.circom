@@ -26,9 +26,12 @@ template ZkAuth(
   signal input iss[max_claim_size];
   signal input sub[max_claim_size];
   signal input iss_loc;
+  signal input iss_padded;
   signal input sub_loc;
-  signal input nonce_loc;
-  signal input nonce_len;
+  signal input sub_padded;
+  signal input aud_loc;
+  signal input aud_len;
+  signal input aud_padded;
 
   // 1. Prove iss is included in the jwt token
   signal jwt_slice_iss[jwt_chunk_size * 2];
@@ -41,12 +44,12 @@ template ZkAuth(
     max_claim_size,
     max_encoded_claim_size,
     max_chunk_count,
-    jwt_chunk_size * 2,
-    1
+    jwt_chunk_size * 2
   );
 
   iss_jwt_inclusion.jwt <== jwt_slice_iss;
   iss_jwt_inclusion.claim <== iss;
+  iss_jwt_inclusion.has_padding <== iss_padded;
   // iss_loc refers to the location within the outer JWT but here we work we segments so we need to find
   // the index within the selected JwtSlice
   // var segment = iss_loc / jwt_chunk_size;
@@ -63,27 +66,35 @@ template ZkAuth(
     max_claim_size,
     max_encoded_claim_size,
     max_chunk_count,
-    jwt_chunk_size * 2,
-    1
+    jwt_chunk_size * 2
   );
 
   sub_jwt_inclusion.jwt <== sub_slice_iss;
   sub_jwt_inclusion.claim <== sub;
+  sub_jwt_inclusion.has_padding <== sub_padded;
   sub_jwt_inclusion.claim_loc <== sub_loc - (sub_first_segment * jwt_chunk_size); // i.e. sub_loc % jwt_chunk_size
 
-  // // Decoder uses slightly but predictably different max_lengths from the encoder. The reason is that encoder works
-  // // with chunks of 3 but decoder with chunks of 4 so we want max_lengths to be divisible by these numbers
-  // component nonce_extractor = JwtExtractor(
-  //   max_claim_size + 3,
-  //   max_encoded_claim_size + 4,
-  //   max_chunk_count + 1,
-  //   max_jwt_size
-  // );
+  // 3. Extract and decode just the aud part from the jwt token
+  signal aud_slice_iss[jwt_chunk_size * 2];
+  signal aud_first_segment;
+  (aud_slice_iss, aud_first_segment) <== JwtSlice(jwt_chunk_size)(
+    jwt_0, jwt_1, jwt_2, jwt_3, jwt_4, jwt_5, jwt_6, jwt_7, jwt_8, jwt_9, aud_loc, aud_loc + aud_len
+  );
+  
+  // Decoder uses slightly but predictably different max_lengths from the encoder. The reason is that encoder works
+  // with chunks of 3 but decoder with chunks of 4 so we want max_lengths to be divisible by these numbers
+  component aud_extractor = JwtExtractor(
+    max_claim_size,
+    max_encoded_claim_size,
+    max_chunk_count,
+    jwt_chunk_size * 2
+  );
 
-  // nonce_extractor.jwt <== jwt;
-  // nonce_extractor.value_loc <== nonce_loc;
-  // nonce_extractor.value_len <== nonce_len;
-  // TODO: nonce_extractor.out might have an offset i.e. we would need to remove either 1 or 2 values to
+  aud_extractor.jwt <== aud_slice_iss;
+  aud_extractor.value_loc <== aud_loc - (aud_first_segment * jwt_chunk_size); // i.e. nonc_loc % jwt_chunk_size;
+  aud_extractor.value_len <== aud_len;
+
+  // TODO: aud_extractor.out might have an offset i.e. we would need to remove either 1 or 2 values to
   // be able to use this value in later operations.
 }
 

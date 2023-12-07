@@ -131,4 +131,4 @@ template Decoder(max_size, max_encoded_size, max_chunk_count) {
   out <== FilterZeros(max_size)(buffer);
 }
 
-// component main = Decoder(80, 100, 20);
+// component main = Decoder(75, 100, 25);
