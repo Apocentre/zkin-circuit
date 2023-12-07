@@ -2,12 +2,12 @@ pragma circom 2.1.6;
 
 include "./jwt/inclusion.circom";
 include "./jwt/extractor.circom";
+include "./jwt/jwt_slice.circom";
 
 template ZkAuth(
   max_claim_size,
   max_encoded_claim_size,
   max_chunk_count,
-  max_jwt_size,
   jwt_chunk_size
 ) {
   /// We split jwt into 10 chunks of jwt_chunk_size
@@ -28,16 +28,20 @@ template ZkAuth(
   signal input sub_loc;
   signal input nonce_loc;
   signal input nonce_len;
+
+  signal jwt_slice_iss[jwt_chunk_size * 2] <== JwtSlice(jwt_chunk_size)(
+    jwt_1, jwt_2, jwt_3, jwt_4, jwt_5, jwt_6, jwt_7, jwt_8, jwt_9, jwt_10, iss_loc, iss_loc + jwt_chunk_size
+  );
   
   component iss_jwt_inclusion = JwtInclusion(
     max_claim_size,
     max_encoded_claim_size,
     max_chunk_count,
-    max_jwt_size,
+    jwt_chunk_size * 2,
     1
   );
 
-  iss_jwt_inclusion.jwt <== jwt;
+  iss_jwt_inclusion.jwt <== jwt_slice_iss;
   iss_jwt_inclusion.claim <== iss;
   iss_jwt_inclusion.claim_loc <== iss_loc;
 
@@ -71,4 +75,4 @@ template ZkAuth(
 
 
 // base64 encoded value has len = 4/3 * ascii_string_len
-component main {public [iss, iss_loc]} = ZkAuth(102, 136, 34, 1000, 100);
+component main {public [iss, iss_loc]} = ZkAuth(75, 100, 25, 100);
