@@ -4,6 +4,7 @@ include "../../node_modules/circomlib/circuits/comparators.circom";
 include "../base64/encoder.circom";
 include "../utils/constants.circom";
 include "../collections/slice.circom";
+include "../utils/range.circom";
 
 template JwtInclusion(
   max_claim_size,

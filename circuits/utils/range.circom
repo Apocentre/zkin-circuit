@@ -2,6 +2,7 @@ pragma circom 2.1.6;
 
 include "../../node_modules/circomlib/circuits/comparators.circom";
 
+// Checks that a€[low, high] is
 template Range(N) {
   signal input a;
   signal input low;

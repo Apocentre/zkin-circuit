@@ -20,7 +20,7 @@ template IncrementValue(N) {
 	}
 }
 
-/// Returns the index of the last item found in this array
+/// Returns the index of the first item found in this array
 template Find(N) {
   signal input in[N];
   signal input match;
