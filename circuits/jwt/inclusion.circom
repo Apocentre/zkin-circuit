@@ -10,10 +10,10 @@ template JwtInclusion(
   max_claim_size,
   max_encoded_claim_size,
   max_chunk_count,
-  max_jwt_size,
+  jwt_segment_len,
   has_padding
 ) {
-  signal input jwt[max_jwt_size];
+  signal input jwt[jwt_segment_len];
   signal input claim[max_claim_size];
   signal input claim_loc;
   
@@ -26,16 +26,19 @@ template JwtInclusion(
   signal end <== encoder.len - start;
   signal final_encoded_claim[max_encoded_claim_size] <== Slice(max_encoded_claim_size, null_char())(encoder.out, start, end);
 
-  signal isB64Char[max_jwt_size];
+  signal isB64Char[jwt_segment_len];
   signal selections[max_encoded_claim_size];
   signal assertions[max_encoded_claim_size];
 
   for(var i = 0; i < max_encoded_claim_size; i++) {
-    selections[i] <== AtIndex(max_jwt_size)(jwt, claim_loc + i);
+    selections[i] <== AtIndex(jwt_segment_len)(jwt, claim_loc + i);
 
     // make sure all bytes are the same
     isB64Char[i] <== LessThan(8)([final_encoded_claim[i], null_char()]);
     assertions[i] <== IsEqual()([isB64Char[i] * final_encoded_claim[i], selections[i] * isB64Char[i]]);
+
+    log("encoded_value", final_encoded_claim[i]);
+    log("jwt_byte", selections[i]);
 
     assertions[i] === 1;
   }

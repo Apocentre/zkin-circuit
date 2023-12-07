@@ -3,6 +3,7 @@ pragma circom 2.1.6;
 include "./jwt/inclusion.circom";
 include "./jwt/extractor.circom";
 include "./jwt/jwt_slice.circom";
+include "./math/integer_div.circom";
 
 template ZkAuth(
   max_claim_size,
@@ -29,7 +30,9 @@ template ZkAuth(
   signal input nonce_loc;
   signal input nonce_len;
 
-  signal jwt_slice_iss[jwt_chunk_size * 2] <== JwtSlice(jwt_chunk_size)(
+  signal jwt_slice_iss[jwt_chunk_size * 2];
+  signal first_segment;
+  (jwt_slice_iss, first_segment) <== JwtSlice(jwt_chunk_size)(
     jwt_1, jwt_2, jwt_3, jwt_4, jwt_5, jwt_6, jwt_7, jwt_8, jwt_9, jwt_10, iss_loc, iss_loc + jwt_chunk_size
   );
   
@@ -43,7 +46,10 @@ template ZkAuth(
 
   iss_jwt_inclusion.jwt <== jwt_slice_iss;
   iss_jwt_inclusion.claim <== iss;
-  iss_jwt_inclusion.claim_loc <== iss_loc;
+  // iss_loc refers to the location within the outer JWT but here we work we segments so we need to find
+  // the index within the selected JwtSlice
+  // var segment = iss_loc / jwt_chunk_size;
+  iss_jwt_inclusion.claim_loc <== iss_loc - (first_segment * jwt_chunk_size); // i.e. iss_loc % jwt_chunk_size
 
   // component sub_jwt_inclusion = JwtInclusion(
   //   max_claim_size,

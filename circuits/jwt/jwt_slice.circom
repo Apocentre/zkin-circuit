@@ -1,6 +1,7 @@
 pragma circom 2.1.6;
 
 include "../../node_modules/circomlib/circuits/comparators.circom";
+include "../math/integer_div.circom";
 
 template SegmentSearch(jwt_chunk_size) {
   signal input segment_index;
@@ -93,16 +94,17 @@ template JwtSlice(jwt_chunk_size) {
   signal input end;
 
   signal output out[jwt_chunk_size * 2];
+  signal output first_segment_index;
 
-  signal start_index_segment <== start / jwt_chunk_size;
-  signal end_index_segment <== end / jwt_chunk_size;
+  first_segment_index <==  IntegerDivision(10)(start, jwt_chunk_size);
+  signal end_segment_index <==  IntegerDivision(10)(end, jwt_chunk_size);
 
   /// Find the two segments
   signal segment_1[jwt_chunk_size] <== SegmentSearch(jwt_chunk_size)(
-    start_index_segment, jwt_1, jwt_2, jwt_3, jwt_4, jwt_5, jwt_6, jwt_7, jwt_8, jwt_9, jwt_10
+    first_segment_index, jwt_1, jwt_2, jwt_3, jwt_4, jwt_5, jwt_6, jwt_7, jwt_8, jwt_9, jwt_10
   );
   signal segment_2[jwt_chunk_size] <== SegmentSearch(jwt_chunk_size)(
-    end_index_segment, jwt_1, jwt_2, jwt_3, jwt_4, jwt_5, jwt_6, jwt_7, jwt_8, jwt_9, jwt_10
+    end_segment_index, jwt_1, jwt_2, jwt_3, jwt_4, jwt_5, jwt_6, jwt_7, jwt_8, jwt_9, jwt_10
   );
 
   // Note that the two segments might be the same a thus the concated output will essentially have the same slice twice
