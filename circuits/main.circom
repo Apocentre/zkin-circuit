@@ -2,7 +2,6 @@ pragma circom 2.1.6;
 
 include "./jwt/inclusion.circom";
 include "./jwt/claim_extractor.circom";
-// include "./jwt/header_extractor.circom";
 include "./jwt/jwt_slice.circom";
 include "./math/integer_div.circom";
 
@@ -24,6 +23,9 @@ template ZkAuth(
   signal input aud_loc;
   signal input aud_len;
   signal input aud_offset;
+  signal input alg_loc;
+  signal input alg_len;
+  signal input alg_offset;
 
   // 1. Prove iss is included in the jwt token
   signal jwt_slice_iss[jwt_chunk_size * 2];
@@ -83,14 +85,16 @@ template ZkAuth(
   // TODO: aud_extractor.out might have an offset i.e. we would need to remove either 1 or 2 values to
   // be able to use this value in later operations.
 
-  // 4. Decode header
-  // component aud_extractor = HeaderExtractor(
-  //   max_claim_size,
-  //   max_encoded_claim_size + 100, // header can be longer than the other ones
-  //   max_chunk_count,
-  //   jwt_chunk_size * 2
-  // );
-  // aud_extractor <== ConcatJwtSegments(jwt_chunk_size)(jwt_0, jwt_1);
+  // 4. Extract alg from header
+  component alg_extractor = ClaimExtractor(
+    max_claim_size,
+    max_encoded_claim_size + 100, // header can be longer than the other ones
+    max_chunk_count,
+    jwt_chunk_size * 2
+  );
+  alg_extractor.jwt <== ConcatJwtSegments(jwt_chunk_size)(jwt_segments[0], jwt_segments[1]);
+  alg_extractor.value_loc <== alg_loc;
+  alg_extractor.value_len <== alg_len;
 }
 
 

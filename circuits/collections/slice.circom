@@ -51,7 +51,7 @@ template Slice(N, pad) {
   }
 }
 
-template SliceFromStart(N, M, pad) {
+template SliceFromStart(N, M) {
   signal input arr[N];
   signal output out[M];
 
