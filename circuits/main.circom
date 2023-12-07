@@ -14,30 +14,49 @@ template ZkAuth(
   signal input sub[max_claim_size];
   signal input iss_loc;
   signal input sub_loc;
+  signal input nonce_loc;
+  signal input nonce_len;
   
-  component iss_jwt_inclusion = JwtInclusion(
-    max_claim_size,
-    max_encoded_claim_size,
-    max_chunk_count,
-    max_jwt_size,
-    1
+  // component iss_jwt_inclusion = JwtInclusion(
+  //   max_claim_size,
+  //   max_encoded_claim_size,
+  //   max_chunk_count,
+  //   max_jwt_size,
+  //   1
+  // );
+
+  // iss_jwt_inclusion.jwt <== jwt;
+  // iss_jwt_inclusion.claim <== iss;
+  // iss_jwt_inclusion.claim_loc <== iss_loc;
+
+  // component sub_jwt_inclusion = JwtInclusion(
+  //   max_claim_size,
+  //   max_encoded_claim_size,
+  //   max_chunk_count,
+  //   max_jwt_size,
+  //   1
+  // );
+
+  // sub_jwt_inclusion.jwt <== jwt;
+  // sub_jwt_inclusion.claim <== sub;
+  // sub_jwt_inclusion.claim_loc <== sub_loc;
+
+  // Decoder uses slightly but predictably different max_lengths from the encoder. The reason is that encoder works
+  // with chunks of 3 but decoder with chunks of 4 so we want max_lengths to be divisible by these numbers
+  component nonce_extractor = JwtExtractor(
+    max_claim_size + 3,
+    max_encoded_claim_size + 4,
+    max_chunk_count + 1,
+    max_jwt_size
   );
 
-  iss_jwt_inclusion.jwt <== jwt;
-  iss_jwt_inclusion.claim <== iss;
-  iss_jwt_inclusion.claim_loc <== iss_loc;
+  nonce_extractor.jwt <== jwt;
+  nonce_extractor.value_loc <== nonce_loc;
+  nonce_extractor.value_len <== nonce_len;
 
-  component sub_jwt_inclusion = JwtInclusion(
-    max_claim_size,
-    max_encoded_claim_size,
-    max_chunk_count,
-    max_jwt_size,
-    1
-  );
-
-  sub_jwt_inclusion.jwt <== jwt;
-  sub_jwt_inclusion.claim <== sub;
-  sub_jwt_inclusion.claim_loc <== sub_loc;
+  for(var i = 0; i < max_claim_size + 3; i++) {
+    log(nonce_extractor.out[i]);
+  }
 }
 
 

@@ -129,10 +129,6 @@ template Decoder(max_size, max_encoded_size, max_chunk_count) {
   }
 
   out <== FilterZeros(max_size)(buffer);
-
-  for(var i = 0; i < max_size; i++) {
-    log(out[i]);
-  }
 }
 
-component main = Decoder(105, 140, 35);
+// component main = Decoder(105, 140, 35);
