@@ -30,9 +30,10 @@ template ZkAuth(
   signal input nonce_loc;
   signal input nonce_len;
 
+  // 1. Prove iss is included in the jwt token
   signal jwt_slice_iss[jwt_chunk_size * 2];
-  signal first_segment;
-  (jwt_slice_iss, first_segment) <== JwtSlice(jwt_chunk_size)(
+  signal iss_first_segment;
+  (jwt_slice_iss, iss_first_segment) <== JwtSlice(jwt_chunk_size)(
     jwt_0, jwt_1, jwt_2, jwt_3, jwt_4, jwt_5, jwt_6, jwt_7, jwt_8, jwt_9, iss_loc, iss_loc + jwt_chunk_size
   );
   
@@ -49,19 +50,26 @@ template ZkAuth(
   // iss_loc refers to the location within the outer JWT but here we work we segments so we need to find
   // the index within the selected JwtSlice
   // var segment = iss_loc / jwt_chunk_size;
-  iss_jwt_inclusion.claim_loc <== iss_loc - (first_segment * jwt_chunk_size); // i.e. iss_loc % jwt_chunk_size
+  iss_jwt_inclusion.claim_loc <== iss_loc - (iss_first_segment * jwt_chunk_size); // i.e. iss_loc % jwt_chunk_size
 
+  // 2. Prove sub is included in the jwt token
+  signal sub_slice_iss[jwt_chunk_size * 2];
+  signal sub_first_segment;
+  (sub_slice_iss, sub_first_segment) <== JwtSlice(jwt_chunk_size)(
+    jwt_0, jwt_1, jwt_2, jwt_3, jwt_4, jwt_5, jwt_6, jwt_7, jwt_8, jwt_9, sub_loc, sub_loc + jwt_chunk_size
+  );
+  
   component sub_jwt_inclusion = JwtInclusion(
     max_claim_size,
     max_encoded_claim_size,
     max_chunk_count,
-    max_jwt_size,
+    jwt_chunk_size * 2,
     1
   );
 
-  sub_jwt_inclusion.jwt <== jwt;
+  sub_jwt_inclusion.jwt <== sub_slice_iss;
   sub_jwt_inclusion.claim <== sub;
-  sub_jwt_inclusion.claim_loc <== sub_loc;
+  sub_jwt_inclusion.claim_loc <== sub_loc - (sub_first_segment * jwt_chunk_size); // i.e. sub_loc % jwt_chunk_size
 
   // // Decoder uses slightly but predictably different max_lengths from the encoder. The reason is that encoder works
   // // with chunks of 3 but decoder with chunks of 4 so we want max_lengths to be divisible by these numbers
