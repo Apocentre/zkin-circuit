@@ -4,7 +4,7 @@ include "circomlib/circuits/comparators.circom";
 include "../math/integer_div.circom";
 
 template SegmentSearch(jwt_chunk_size) {
-  signal input jwt_segments[10][jwt_chunk_size];
+  signal input jwt_segments[8][jwt_chunk_size];
   signal input segment_index;
   signal output out[jwt_chunk_size];
 
@@ -18,12 +18,8 @@ template SegmentSearch(jwt_chunk_size) {
   signal seg_6_eq <== IsEqual()([segment_index, 6]);
   signal seg_7_eq <== IsEqual()([segment_index, 7]);
   signal seg_8_eq <== IsEqual()([segment_index, 8]);
-  signal seg_9_eq <== IsEqual()([segment_index, 9]);
-  signal seg_10_eq <== IsEqual()([segment_index, 10]);
 
-  signal c_9[jwt_chunk_size]; signal c_9_i[jwt_chunk_size];
-  signal c_8[jwt_chunk_size]; signal c_8_i[jwt_chunk_size];
-  signal c_7[jwt_chunk_size]; signal c_7_i[jwt_chunk_size];
+  signal c_7[jwt_chunk_size];
   signal c_6[jwt_chunk_size]; signal c_6_i[jwt_chunk_size];
   signal c_5[jwt_chunk_size]; signal c_5_i[jwt_chunk_size];
   signal c_4[jwt_chunk_size]; signal c_4_i[jwt_chunk_size];
@@ -40,11 +36,7 @@ template SegmentSearch(jwt_chunk_size) {
         ....
       }
     **/
-    c_9[i] <== seg_9_eq * jwt_segments[9][i];
-    c_8_i[i] <== (1 - seg_8_eq) * c_9[i];
-    c_8[i] <== seg_8_eq * jwt_segments[8][i] + c_8_i[i];
-    c_7_i[i] <== (1 - seg_7_eq) * c_8[i];
-    c_7[i] <== seg_7_eq * jwt_segments[7][i] + c_7_i[i];
+    c_7[i] <== seg_7_eq * jwt_segments[7][i];
     c_6_i[i] <== (1 - seg_6_eq) * c_7[i];
     c_6[i] <== seg_6_eq * jwt_segments[6][i] + c_6_i[i];
     c_5_i[i] <== (1 - seg_5_eq) * c_6[i];
@@ -86,7 +78,7 @@ template ConcatJwtSegments(jwt_chunk_size) {
 /// base64 encoded values of max length `jwt_chunk_size` which most likely be 100. So we know that the encoded value
 /// will at most span across 2 of the below segments.
 template JwtSlice(jwt_chunk_size) {
-  signal input jwt_segments[10][jwt_chunk_size];
+  signal input jwt_segments[8][jwt_chunk_size];
   signal input start;
   signal input end;
 

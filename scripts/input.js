@@ -70,10 +70,21 @@ const createInputs = async (msg=data.jwt, signature=data.sig) => {
   const message_padded_bytes = messagePaddedLen.toString();
   const message = await Uint8ArrayToCharArray(messagePadded); 
 
+  const issClaim = findClaimLocation(data.jwt, data.iss);
+  const subClaim = findClaimLocation(data.jwt, data.sub);
+  const audClaim = findClaimLocation(data.jwt, data.aud);
+  
   const inputs = {
     jwt_segments: splitJWT(message),
-    ...findClaimLocation(data.jwt, data.iss, "iss"),
-    ...findClaimLocation(data.jwt, data.sub, "sub"),
+    iss: issClaim[0],
+    iss_loc: issClaim[1],
+    iss_padded: issClaim[2],
+    sub: subClaim[0],
+    sub_loc: subClaim[1],
+    sub_padded: subClaim[2],
+    aud_loc: audClaim[1],
+    aud_len: audClaim[0].length,
+    aud_offset: audClaim[3],
   }
 
   await writeFile(

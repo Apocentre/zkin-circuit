@@ -11,8 +11,8 @@ template ZkAuth(
   max_chunk_count,
   jwt_chunk_size
 ) {
-  /// We split jwt into 10 chunks of jwt_chunk_size
-  signal input jwt_segments[10][jwt_chunk_size];
+  /// We split jwt into 8 chunks of jwt_chunk_size
+  signal input jwt_segments[8][jwt_chunk_size];
 
   signal input iss[max_claim_size];
   signal input sub[max_claim_size];
@@ -23,9 +23,6 @@ template ZkAuth(
   signal input aud_loc;
   signal input aud_len;
   signal input aud_offset;
-  signal input alg_loc;
-  signal input alg_len;
-  signal input alg_offset;
 
   // 1. Prove iss is included in the jwt token
   signal jwt_slice_iss[jwt_chunk_size * 2];
@@ -44,7 +41,6 @@ template ZkAuth(
   iss_jwt_inclusion.has_padding <== iss_padded;
   // iss_loc refers to the location within the outer JWT but here we work we segments so we need to find
   // the index within the selected JwtSlice
-  // var segment = iss_loc / jwt_chunk_size;
   iss_jwt_inclusion.claim_loc <== iss_loc - (iss_first_segment * jwt_chunk_size); // i.e. iss_loc % jwt_chunk_size
 
   // 2. Prove sub is included in the jwt token
@@ -65,9 +61,9 @@ template ZkAuth(
   sub_jwt_inclusion.claim_loc <== sub_loc - (sub_first_segment * jwt_chunk_size); // i.e. sub_loc % jwt_chunk_size
 
   // 3. Extract and decode just the aud part from the jwt token
-  signal aud_slice_iss[jwt_chunk_size * 2];
+  signal jwt_slice_aud[jwt_chunk_size * 2];
   signal aud_first_segment;
-  (aud_slice_iss, aud_first_segment) <== JwtSlice(jwt_chunk_size)(jwt_segments, aud_loc, aud_loc + aud_len);
+  (jwt_slice_aud, aud_first_segment) <== JwtSlice(jwt_chunk_size)(jwt_segments, aud_loc, aud_loc + aud_len);
   
   // Decoder uses slightly but predictably different max_lengths from the encoder. The reason is that encoder works
   // with chunks of 3 but decoder with chunks of 4 so we want max_lengths to be divisible by these numbers
@@ -78,7 +74,7 @@ template ZkAuth(
     jwt_chunk_size * 2
   );
 
-  aud_extractor.jwt <== aud_slice_iss;
+  aud_extractor.jwt <== jwt_slice_aud;
   aud_extractor.value_loc <== aud_loc - (aud_first_segment * jwt_chunk_size); // i.e. nonc_loc % jwt_chunk_size;
   aud_extractor.value_len <== aud_len;
 
@@ -88,4 +84,4 @@ template ZkAuth(
 
 
 // base64 encoded value has len = 4/3 * ascii_string_len
-component main {public [iss, iss_loc]} = ZkAuth(75, 100, 25, 100);
+component main {public [iss, iss_loc]} = ZkAuth(75, 100, 25, 128);

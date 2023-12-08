@@ -36,7 +36,7 @@ template JwtInclusion(
     // make sure all bytes are the same
     isB64Char[i] <== LessThan(8)([final_encoded_claim[i], null_char()]);
     assertions[i] <== IsEqual()([isB64Char[i] * final_encoded_claim[i], selections[i] * isB64Char[i]]);
-    
+
     assertions[i] === 1;
   }
 }

@@ -15,7 +15,7 @@ const PAD_CHAR = 64;
 const MAX_CLAIM_LEN = 75;
 const NULL_CHAR = 128;
 
-const findClaimLocation = (jwt, claim, claimName) => {
+const findClaimLocation = (jwt, claim) => {
   const jwtBytes = toByteArray(jwt);
   let claimBytes = toByteArray(claim);
 
@@ -43,7 +43,6 @@ const findClaimLocation = (jwt, claim, claimName) => {
     if(jwt.indexOf(versions[i]) !== -1) {
       claimLocation = jwt.indexOf(versions[i]);
       offset = i;
-      claimBytes = toByteArray(versions[i]);
       
       if(i > 0) {
         isPadded = 1;
@@ -51,11 +50,11 @@ const findClaimLocation = (jwt, claim, claimName) => {
       break;
     }
   }
-  
 
   // Assert that that offset_0 is indeed part of the encoded jwt
-  for (let i = claimLocation, j = 0; i < claimLocation + claimBytes.length; i++, j++) {
-    assert(jwtBytes[i] === claimBytes[j]);
+  const actual = toByteArray(versions[offset]);
+  for (let i = claimLocation, j = 0; i < claimLocation + actual.length; i++, j++) {
+    assert(jwtBytes[i] === actual[j]);
   }
 
   claimBytes = Array.from(claimBytes)
@@ -66,11 +65,7 @@ const findClaimLocation = (jwt, claim, claimName) => {
   const len = claimBytes.length;
   claimBytes = [...claimBytes, ...new Array(Math.max(MAX_CLAIM_LEN - len, 0)).fill(NULL_CHAR)];
 
-  return {
-    [claimName]: claimBytes.map(v => v.toString()),
-    [`${claimName}_loc`]: claimLocation,
-    [`${claimName}_padded`]: isPadded,
-  };
+  return [claimBytes.map(v => v.toString()), claimLocation, isPadded, offset]
 }
 
 module.exports = findClaimLocation;
