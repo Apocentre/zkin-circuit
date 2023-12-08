@@ -44,12 +44,43 @@ template Slice(N, pad) {
     // Get the element at index: start + i
     selections[i] <== AtIndex(N)(arr, start + i);
 
-    pads[i] <== rangeChecks[i] * 0 + (1 - rangeChecks[i]) * pad;
+    pads[i] <== (1 - rangeChecks[i]) * pad;
 
     // Set 0 to indexes outside the range. If inside the set the value at index taken from selections[i]
     out[i] <== selections[i] * rangeChecks[i] + pads[i];
   }
 }
+
+// Another version of slice where the input and output lens are not necesserily of the same length
+template SliceWithVariableLen(inSize, outSize, pad) {
+  signal input in[inSize];
+  signal input offset;
+  signal input length;
+  
+  signal output out[outSize];
+  
+  component selector[outSize];
+  signal eqs[inSize][outSize];
+  signal lt[outSize];
+  signal mask[inSize][outSize];
+  signal eqs_0[outSize];
+
+  for(var i = 0; i < outSize; i++) {
+    selector[i] = Sum(inSize);
+    
+    lt[i] <== LessThan(8)([i, length]);
+    
+    for(var j = 0; j < inSize; j++) {
+      eqs[j][i] <== IsEqual()([j, offset + i]);
+      mask[j][i] <== eqs[j][i] * lt[i];
+      selector[i].in[j] <== mask[j][i] * in[j];
+    }
+
+    eqs_0[i] <== IsEqual()([selector[i].out, 0]);
+    out[i] <== eqs_0[i] * selector[i].out + (1 - eqs_0[i]) * pad;
+  }
+}
+
 
 template SliceFromStart(N, M) {
   signal input arr[N];
