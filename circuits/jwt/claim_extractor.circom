@@ -19,10 +19,6 @@ template ClaimExtractor(
     jwt, value_loc, value_loc + value_len
   );
 
-  for(var i = 0; i < max_encoded_claim_size; i++) {
-    log(encoded_value[i]);
-  }
-
   component decoder = Decoder(max_claim_size, max_encoded_claim_size, max_chunk_count);
   decoder.value <== encoded_value;
 
