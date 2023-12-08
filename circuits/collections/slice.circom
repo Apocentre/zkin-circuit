@@ -77,7 +77,7 @@ template SliceWithVariableLen(inSize, outSize, pad) {
     }
 
     eqs_0[i] <== IsEqual()([selector[i].out, 0]);
-    out[i] <== eqs_0[i] * selector[i].out + (1 - eqs_0[i]) * pad;
+    out[i] <== eqs_0[i] * pad + (1 - eqs_0[i]) * selector[i].out;
   }
 }
 

@@ -18,7 +18,7 @@ template ClaimExtractor(
   signal encoded_value[max_encoded_claim_size] <== SliceWithVariableLen(jwt_segment_len, max_encoded_claim_size, null_char())(
     jwt, value_loc, value_loc + value_len
   );
-
+  
   component decoder = Decoder(max_claim_size, max_encoded_claim_size, max_chunk_count);
   decoder.value <== encoded_value;
 
