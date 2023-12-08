@@ -2,9 +2,9 @@ pragma circom 2.1.6;
 
 // TODO: Check the Num2Bits circuit. Maybe there is a simpler way to do shift operations.
 
-include "../../node_modules/circomlib/circuits/bitify.circom";
-include "../../node_modules/circomlib/circuits/sha256/shift.circom";
-include "../../node_modules/circomlib/circuits/gates.circom";
+include "circomlib/circuits/bitify.circom";
+include "circomlib/circuits/sha256/shift.circom";
+include "circomlib/circuits/gates.circom";
 
 /// This is similar to ShR from the Circomlib
 template LhR(n, r) {

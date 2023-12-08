@@ -1,8 +1,8 @@
 pragma circom 2.1.6;
 
-include "../../node_modules/circomlib/circuits/bitify.circom";
-include "../../node_modules/circomlib/circuits/comparators.circom";
-include "../../node_modules/circomlib/circuits/mux1.circom";
+include "circomlib/circuits/bitify.circom";
+include "circomlib/circuits/comparators.circom";
+include "circomlib/circuits/mux1.circom";
 
 template IntegerDivision(n) {
     // require max(a, b) < 2**n

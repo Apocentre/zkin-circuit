@@ -1,6 +1,6 @@
 pragma circom 2.1.6;
 
-include "../../node_modules/circomlib/circuits/comparators.circom";
+include "circomlib/circuits/comparators.circom";
 include "../math/integer_div.circom";
 
 template SegmentSearch(jwt_chunk_size) {

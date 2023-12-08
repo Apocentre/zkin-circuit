@@ -1,6 +1,6 @@
 pragma circom 2.1.6;
 
-include "../../node_modules/circomlib/circuits/comparators.circom";
+include "circomlib/circuits/comparators.circom";
 include "../utils/not_equal.circom";
 include "./lookup_table.circom";
 include "../utils/constants.circom";

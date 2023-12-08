@@ -1,6 +1,6 @@
 pragma circom 2.1.6;
 
-include "../../node_modules/circomlib/circuits/comparators.circom";
+include "circomlib/circuits/comparators.circom";
 include "../math/aggregation.circom";
 
 // Given an array of N elements return the value at `index`

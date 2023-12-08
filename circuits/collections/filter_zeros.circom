@@ -1,6 +1,6 @@
 pragma circom 2.1.6;
 
-include "../../node_modules/circomlib/circuits/comparators.circom";
+include "circomlib/circuits/comparators.circom";
 include "./Find.circom";
 
 /// Filtes all zeros from the given array. It moves them to the back of the out array. Similar to Filter but more

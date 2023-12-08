@@ -1,6 +1,6 @@
 pragma circom 2.1.6;
 
-include "../../node_modules/circomlib/circuits/comparators.circom";
+include "circomlib/circuits/comparators.circom";
 include "../utils/not_equal.circom";
 
 // Find will return the exact same index for the same array. If we want to search for multiple occurences of the same item
