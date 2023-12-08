@@ -14,3 +14,4 @@ build
 contracts
 test_build
 .DevNotes.md
+scripts/data.json

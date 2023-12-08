@@ -8,6 +8,7 @@
     "compile": "circom circuits/main.circom  --r1cs --sym --wasm -o build -l node_modules"
   },
   "dependencies": {
+    "@zk-email/circuits": "^3.2.2",
     "circomlib": "^2.0.5"
   }
 }
