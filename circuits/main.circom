@@ -31,14 +31,19 @@ template ZkAuth(
     max_jwt_bytes, max_json_bytes, jwt_ascii_chunk_size
   )(jwt, header_len);
 
-
   // 3. Verify iss is located in the decoded jwt_ascii
   component iss_jwt_inclusion = JwtInclusion(max_claim_size, chunk_count, jwt_ascii_chunk_size);
   iss_jwt_inclusion.jwt_ascii <== jwt_ascii;
   iss_jwt_inclusion.claim <== iss;
   iss_jwt_inclusion.claim_loc <== iss_loc;
 
-  // 4. verify the signature
+  // 4. Verify sub is located in the decoded jwt_ascii
+  component sub_jwt_inclusion = JwtInclusion(max_claim_size, chunk_count, jwt_ascii_chunk_size);
+  sub_jwt_inclusion.jwt_ascii <== jwt_ascii;
+  sub_jwt_inclusion.claim <== sub;
+  sub_jwt_inclusion.claim_loc <== sub_loc;
+
+  // 5. verify the signature
   component rsa_sha256 = RsaSha256(max_jwt_bytes, n, k);
   rsa_sha256.message <== jwt;
   rsa_sha256.msg_padded_bytes <== jwt_padded_bytes;
