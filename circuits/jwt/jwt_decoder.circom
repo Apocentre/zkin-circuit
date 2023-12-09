@@ -5,7 +5,7 @@ include "../base64.circom";
 
 template JwtDecoder(max_jwt_bytes, max_json_bytes, jwt_ascii_chunk_size) {
   signal input jwt[max_jwt_bytes];
-  signal input header_len;
+  signal input dot_index;
   
   var chunk_count = (max_json_bytes + 2) / jwt_ascii_chunk_size;
   signal output out[chunk_count][jwt_ascii_chunk_size];
@@ -17,7 +17,7 @@ template JwtDecoder(max_jwt_bytes, max_json_bytes, jwt_ascii_chunk_size) {
   // we have to ignore the "." between then header and the payload.
   for (var i = 0; i < max_jwt_bytes - 1; i++) {
     // is dot?
-    eqs[i] <== GreaterEqThan(15)([i, header_len]);
+    eqs[i] <== GreaterEqThan(15)([i, dot_index]);
     
     normal_bytes[i] <== (1 - eqs[i]) * jwt[i];
     jwt_ascii.in[i] <== eqs[i] * jwt[i + 1] + normal_bytes[i];

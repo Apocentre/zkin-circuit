@@ -15,7 +15,7 @@ template ZkAuth(
   signal input jwt[max_jwt_bytes];
   signal input jwt_padded_bytes; // length of the jwt including the padding
 
-  signal input header_len;
+  signal input dot_index;
   signal input iss[max_claim_size];
   signal input sub[max_claim_size];
   signal input iss_loc;
@@ -29,7 +29,7 @@ template ZkAuth(
   var chunk_count = (max_json_bytes + 2) / jwt_ascii_chunk_size;
   signal jwt_ascii[chunk_count][jwt_ascii_chunk_size] <== JwtDecoder(
     max_jwt_bytes, max_json_bytes, jwt_ascii_chunk_size
-  )(jwt, header_len);
+  )(jwt, dot_index);
 
   // 3. Verify iss is located in the decoded jwt_ascii
   component iss_jwt_inclusion = JwtInclusion(max_claim_size, chunk_count, jwt_ascii_chunk_size);
