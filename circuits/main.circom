@@ -3,7 +3,7 @@ pragma circom 2.1.6;
 include "./jwt/inclusion.circom";
 include "./jwt/claim_extractor.circom";
 include "./jwt/jwt_slice.circom";
-include "./crypto/sha256.circom";
+include "./crypto/rsa_sha256.circom";
 include "./math/integer_div.circom";
 
 template ZkAuth(
@@ -88,9 +88,11 @@ template ZkAuth(
   // be able to use this value in later operations.
 
   // 4. verify the signature
-  component sha256 = Sha256(max_jwt_bytes, jwt_chunk_size, n);
-  sha256.msg_padded_bytes <== jwt_padded_bytes;
-  sha256.msg_segments <== jwt_segments;
+  component rsa_sha256 = RsaSha256(max_jwt_bytes, jwt_chunk_size, n, k);
+  rsa_sha256.msg_padded_bytes <== jwt_padded_bytes;
+  rsa_sha256.msg_segments <== jwt_segments;
+  rsa_sha256.modulus <== modulus;
+  rsa_sha256.signature <== signature;
 }
 
 
