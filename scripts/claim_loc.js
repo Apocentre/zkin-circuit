@@ -1,4 +1,4 @@
-const assert = require("assert");
+import assert from "assert";
 
 const toByteArray = (str) => {
   let utf8Encode = new TextEncoder();
@@ -15,7 +15,7 @@ const PAD_CHAR = 64;
 const MAX_CLAIM_LEN = 75;
 const NULL_CHAR = 128;
 
-const findClaimLocation = (jwt, claim) => {
+export const findClaimLocation = (jwt, claim) => {
   const jwtBytes = toByteArray(jwt);
   let claimBytes = toByteArray(claim);
 
@@ -68,4 +68,3 @@ const findClaimLocation = (jwt, claim) => {
   return [claimBytes.map(v => v.toString()), claimLocation, isPadded, offset]
 }
 
-module.exports = findClaimLocation;

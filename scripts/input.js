@@ -1,8 +1,14 @@
-const {mkdir, readdir, copyFile, readFile, writeFile} = require("fs/promises");
-const assert = require("assert");
-const data = require("./data.json");
-const findClaimLocation = require("./claim_loc");
-const splitJWT = require("./split_jwt");
+import {writeFile} from "fs/promises";
+import assert from "assert";
+import data from "./data.json" assert { type: "json" };
+import {findClaimLocation} from "./claim_loc.js";
+import {splitJWT} from "./split_jwt.js";
+import {getPubkey} from "./jwks.js";
+import path from "path";
+import {fileURLToPath} from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const MAX_MSG_PADDED_BYTES = 1024;
 
@@ -74,6 +80,8 @@ const createInputs = async (msg=data.jwt, signature=data.sig) => {
   const subClaim = findClaimLocation(data.jwt, data.sub);
   const audClaim = findClaimLocation(data.jwt, data.aud);
   
+  await getPubkey(data.jwt);
+
   const inputs = {
     jwt_segments: splitJWT(message),
     iss: issClaim[0],
