@@ -4,7 +4,6 @@
   "main": "index.js",
   "author": "ppoliani <ppoliani@gmail.com>",
   "license": "MIT",
-  "type": "module",
   "scripts": {
     "compile": "circom circuits/main.circom  --r1cs --sym --wasm -o build -l node_modules"
   },

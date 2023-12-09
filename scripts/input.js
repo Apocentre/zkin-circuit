@@ -1,14 +1,9 @@
-import {writeFile} from "fs/promises";
-import assert from "assert";
-import data from "./data.json" assert { type: "json" };
-import {findClaimLocation} from "./claim_loc.js";
-import {splitJWT} from "./split_jwt.js";
-import {getPubkey} from "./jwks.js";
-import path from "path";
-import {fileURLToPath} from "url";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const {writeFile} = require("fs/promises");
+const assert = require("assert");
+const data = require("./data.json");
+const {findClaimLocation} = require("./claim_loc.js");
+const {splitJWT} = require("./split_jwt.js");
+const {getPubkey} = require("./jwks.js");
 
 // circom constants from main.circom / https://zkrepl.dev/?gist=30d21c7a7285b1b14f608325f172417b
 // template RSAGroupSigVerify(n, k, levels) {

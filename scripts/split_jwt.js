@@ -1,4 +1,4 @@
-export const splitJWT = (jwt) => {
+const splitJWT = (jwt) => {
   const result = [];
   let i = 0;
 
@@ -10,3 +10,5 @@ export const splitJWT = (jwt) => {
 
   return result
 }
+
+module.exports = {splitJWT}
