@@ -105,7 +105,7 @@ const createInputs = async (msg=data.jwt, sig=data.sig) => {
     aud_len: audClaim[0].length,
     aud_offset: audClaim[3],
     signature,
-    n: rsaPubkey,
+    modulus: rsaPubkey,
   }
 
   await writeFile(
