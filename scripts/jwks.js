@@ -12,5 +12,7 @@ export const getPubkey = async (jwt) => {
   const pubKeyData = nodeForge.pki.publicKeyFromPem(signingKey);
   const modulus = BigInt(pubKeyData.n.toString());
 
+  console.log(pubKeyData.n.data.length)
+
   return modulus;
 }

@@ -10,7 +10,25 @@ import {fileURLToPath} from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// circom constants from main.circom / https://zkrepl.dev/?gist=30d21c7a7285b1b14f608325f172417b
+// template RSAGroupSigVerify(n, k, levels) {
+// component main { public [ modulus ] } = RSAVerify(121, 17);
+// component main { public [ root, payload1 ] } = RSAGroupSigVerify(121, 17, 30);
+const CIRCOM_BIGINT_N = 121;
+const CIRCOM_BIGINT_K = 17;
 const MAX_MSG_PADDED_BYTES = 1024;
+
+const toCircomBigIntBytes = (num) => {
+  const res = [];
+  const bigintNum = typeof num == "bigint" ? num : num.valueOf();
+  const msk = (1n << BigInt(CIRCOM_BIGINT_N)) - 1n;
+
+  for (let i = 0; i < CIRCOM_BIGINT_K; ++i) {
+    res.push(((bigintNum >> BigInt(i * CIRCOM_BIGINT_N)) & msk).toString());
+  }
+  
+  return res;
+}
 
 const mergeUInt8Arrays = (a1, a2) => {
   var mergedArray = new Uint8Array(a1.length + a2.length);
@@ -69,21 +87,19 @@ const sha256Pad = async (prehash_prepad_m, maxShaBytes) => {
   return [prehash_prepad_m, messageLen];
 }
 
-const createInputs = async (msg=data.jwt, signature=data.sig) => {
-  const sig = BigInt(`0x${Buffer.from(signature, "base64").toString("hex")}`);
-  
-  const [messagePadded, messagePaddedLen] = await sha256Pad(new TextEncoder().encode(msg), MAX_MSG_PADDED_BYTES);
-  const message_padded_bytes = messagePaddedLen.toString();
-  const message = await Uint8ArrayToCharArray(messagePadded); 
-
+const createInputs = async (msg=data.jwt, sig=data.sig) => {
+  const signature = toCircomBigIntBytes(BigInt(`0x${Buffer.from(sig, "base64").toString("hex")}`));
+  const [jwtPadded, jwtPaddedLen] = await sha256Pad(new TextEncoder().encode(msg), MAX_MSG_PADDED_BYTES);
+  const jwt_padded_bytes = jwtPaddedLen.toString();
+  const jwt = await Uint8ArrayToCharArray(jwtPadded); 
   const issClaim = findClaimLocation(data.jwt, data.iss);
   const subClaim = findClaimLocation(data.jwt, data.sub);
-  const audClaim = findClaimLocation(data.jwt, data.aud);
-  
-  await getPubkey(data.jwt);
+  const audClaim = findClaimLocation(data.jwt, data.aud);  
+  const rsaPubkey = toCircomBigIntBytes(await getPubkey(data.jwt));
 
   const inputs = {
-    jwt_segments: splitJWT(message),
+    jwt_segments: splitJWT(jwt),
+    jwt_padded_bytes,
     iss: issClaim[0],
     iss_loc: issClaim[1],
     iss_padded: issClaim[2],
@@ -93,6 +109,8 @@ const createInputs = async (msg=data.jwt, signature=data.sig) => {
     aud_loc: audClaim[1],
     aud_len: audClaim[0].length,
     aud_offset: audClaim[3],
+    signature,
+    n: rsaPubkey,
   }
 
   await writeFile(

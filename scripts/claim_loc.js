@@ -10,7 +10,7 @@ const fromByteArray = (byteArray) => {
   return utf8Decode.decode(byteArray)
 }
 
-// @
+// chaacter @
 const PAD_CHAR = 64;
 const MAX_CLAIM_LEN = 75;
 const NULL_CHAR = 128;

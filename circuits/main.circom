@@ -3,16 +3,20 @@ pragma circom 2.1.6;
 include "./jwt/inclusion.circom";
 include "./jwt/claim_extractor.circom";
 include "./jwt/jwt_slice.circom";
+include "./crypto/sha256.circom";
 include "./math/integer_div.circom";
 
 template ZkAuth(
   max_claim_size,
   max_encoded_claim_size,
   max_chunk_count,
-  jwt_chunk_size
+  jwt_chunk_size,
+  max_jwt_bytes, // essentially 8 * jwt_chunk_size
+  n, k
 ) {
   /// We split jwt into 8 chunks of jwt_chunk_size
   signal input jwt_segments[8][jwt_chunk_size];
+  signal input jwt_padded_bytes; // length of the jwt including the padding
 
   signal input iss[max_claim_size];
   signal input sub[max_claim_size];
@@ -23,6 +27,8 @@ template ZkAuth(
   signal input aud_loc;
   signal input aud_len;
   signal input aud_offset;
+  signal input modulus[k]; // jwt provider rsa pubkey
+  signal input signature[k];
 
   // 1. Prove iss is included in the jwt token
   signal jwt_slice_iss[jwt_chunk_size * 2];
@@ -80,8 +86,13 @@ template ZkAuth(
 
   // TODO: aud_extractor.out might have an offset i.e. we would need to remove either 1 or 2 values to
   // be able to use this value in later operations.
+
+  // 4. verify the signature
+  component sha256 = Sha256(max_jwt_bytes, jwt_chunk_size, n);
+  sha256.msg_padded_bytes <== jwt_padded_bytes;
+  sha256.msg_segments <== jwt_segments;
 }
 
 
 // base64 encoded value has len = 4/3 * ascii_string_len
-component main {public [iss, iss_loc]} = ZkAuth(75, 100, 25, 128);
+component main {public [iss, iss_loc]} = ZkAuth(75, 100, 25, 128, 1024, 121, 17);
