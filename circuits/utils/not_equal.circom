@@ -11,6 +11,7 @@ template NotEqual() {
   isEq.in[0] <== in[0];
   isEq.in[1] <== in[1];
 
+  // TODO: is this under-constrained?
   signal result <-- isEq.out == 1 ? 0 : 1;
   
   out <== result;
