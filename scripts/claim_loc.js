@@ -1,4 +1,7 @@
 const assert = require("assert");
+const {
+  COMMA_ASCII, COLON_ASCII, QUOTE_ASCII,
+} = require("./constants");
 
 const toByteArray = (str) => {
   let utf8Encode = new TextEncoder();
@@ -19,16 +22,14 @@ const findClaimLocation = (jwt, claim) => {
   const jwtBytes = toByteArray(jwt);
   let claimBytes = toByteArray(claim);
 
-  // generate the text at all possible three-byte offsets, and remove the characters that might be influenced by the context
-  let offset_0 = btoa(fromByteArray(claimBytes));
-  // add one character infront. @ is 64 in decimal
-  let offset_1 = btoa(fromByteArray(new Uint8Array([PAD_CHAR, ...claimBytes])));
+  // generate the text at all possible possible version
+  let clean_test = btoa(fromByteArray(userId));
+  let colon_at_0_index = btoa(fromByteArray(new Uint8Array([58, ...userId])));
   // add two character infront
-  let offset_2 = btoa(fromByteArray(new Uint8Array([PAD_CHAR, PAD_CHAR, ...claimBytes])));
-
-  // Adding three will have a strint that contains the offset_0 as a substring; So we don't need to take this into
-  // account. We really have only three possbile version of the b64 encoded claim
-  const offset_3 = btoa(fromByteArray(new Uint8Array([PAD_CHAR, PAD_CHAR, PAD_CHAR, ...claimBytes])));
+  let offset_2 = btoa(fromByteArray(new Uint8Array([58, 34, ...userId])));
+  let offset_0_1 = btoa(fromByteArray(new Uint8Array([...userId, 44])));
+  let offset_1_1 = btoa(fromByteArray(new Uint8Array([34, ...userId, 34])));
+  let offset_1_1_i = btoa(fromByteArray(new Uint8Array([58, ...userId, 44])));
 
   // remove 4 bytes from start and end of offset_1 and offset_2
   offset_1 = offset_1.slice(4).slice(0, -4);
