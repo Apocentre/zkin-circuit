@@ -1,10 +1,8 @@
 pragma circom 2.1.6;
 
-include "./jwt/inclusion.circom";
-include "./jwt/claim_extractor.circom";
+include "./jwt/claim_verifier.circom";
 include "./jwt/jwt_slice.circom";
 include "./crypto/rsa_sha256.circom";
-include "./math/integer_div.circom";
 
 template ZkAuth(
   max_claim_bytes,
@@ -27,14 +25,21 @@ template ZkAuth(
 
 
   // 1. verify the signature
-  component rsa_sha256 = RsaSha256(chunk_count, jwt_chunk_size, n, k);
-  rsa_sha256.msg_padded_bytes <== jwt_padded_bytes;
-  rsa_sha256.msg_segments <== jwt_segments;
-  rsa_sha256.modulus <== modulus;
-  rsa_sha256.signature <== signature;
+  // component rsa_sha256 = RsaSha256(chunk_count, jwt_chunk_size, n, k);
+  // rsa_sha256.msg_padded_bytes <== jwt_padded_bytes;
+  // rsa_sha256.msg_segments <== jwt_segments;
+  // rsa_sha256.modulus <== modulus;
+  // rsa_sha256.signature <== signature;
 
-  component iss_claim = ClaimVerifier(max_claim_bytes, max_claim_json_bytes, jwt_segment_len * 2);
-  iss_claim.jwt <== 
+  // 2. prove iss inclusion
+  signal iss_slice[jwt_chunk_size * 2];
+  signal iss_first_segment;
+  (iss_slice, iss_first_segment) <== JwtSlice(chunk_count, jwt_chunk_size)(jwt_segments, iss_loc, iss_loc + jwt_chunk_size);
+
+  component iss_claim = ClaimVerifier(max_claim_bytes, max_claim_json_bytes, jwt_chunk_size * 2);
+  iss_claim.jwt <== iss_slice;
+  iss_claim.claim <== iss;
+  iss_claim.claim_loc <== iss_loc - (iss_first_segment * jwt_chunk_size); // i.e. iss_loc % jwt_chunk_size
 }
 
 

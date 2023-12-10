@@ -1,6 +1,7 @@
 pragma circom 2.1.6;
 
 include "../base64.circom";
+include "../collections/slice.circom";
 include "./claim_sanitizer.circom";
 
 
@@ -17,8 +18,8 @@ template ClaimVerifier(
   signal input claim[max_claim_bytes];
   signal input claim_loc;
 
-  signal selections[max_encoded_claim_size];
-  signal assertions[max_encoded_claim_size];
+  signal selections[max_claim_bytes];
+  signal assertions[max_claim_bytes];
 
   // 1. verify that the entier clzaim is inluded in the JWT
   for(var i = 0; i < max_claim_bytes; i++) {
@@ -30,8 +31,6 @@ template ClaimVerifier(
   }
   
   // 2. Decode the b64 encoded claim value
-  component claim_ascii[max_claim_json_bytes] = Base64Decode(max_claim_json_bytes);
-  claim_ascii.in <== claim;
-
-  signal sanitized_claim <== ClaimSanitizer(max_claim_json_bytes)(claim_ascii.out);
+  signal claim_ascii[max_claim_json_bytes] <== Base64Decode(max_claim_json_bytes)(claim);
+  signal sanitized_claim[max_claim_json_bytes] <== ClaimSanitizer(max_claim_json_bytes)(claim_ascii);
 }

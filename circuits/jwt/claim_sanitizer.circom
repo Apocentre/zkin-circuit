@@ -28,8 +28,8 @@ template ClaimSanitizer(max_claim_json_bytes) {
   signal indexes_to_remove[2];
 
   signal remote_first_index <== colon_at_0_index + quote_at_0_index;
-  indexes_to_remove[0] <== (================) + ;
+  // indexes_to_remove[0] <== (================) + ;
   
   // either the secods index or the last index
-  indexes_to_remove[1] <== (colon_at_last_index + quote_at_last_index) * len + quote_at_1_index;
+  // indexes_to_remove[1] <== (colon_at_last_index + quote_at_last_index) * max_claim_json_bytes + quote_at_1_index;
 }
