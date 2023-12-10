@@ -17,6 +17,7 @@ template ClaimVerifier(
   signal input jwt[jwt_segment_len];
   signal input claim[max_claim_bytes];
   signal input claim_loc;
+  signal output out[max_claim_json_bytes];
 
   signal selections[max_claim_bytes];
   signal assertions[max_claim_bytes];
@@ -32,5 +33,5 @@ template ClaimVerifier(
   
   // 2. Decode the b64 encoded claim value
   signal claim_ascii[max_claim_json_bytes] <== Base64Decode(max_claim_json_bytes)(claim);
-  signal sanitized_claim[max_claim_json_bytes] <== ClaimSanitizer(max_claim_json_bytes)(claim_ascii);
+  out <== ClaimSanitizer(max_claim_json_bytes)(claim_ascii);
 }
