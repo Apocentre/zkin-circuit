@@ -3,8 +3,8 @@ pragma circom 2.1.6;
 include "circomlib/circuits/comparators.circom";
 include "../math/integer_div.circom";
 
-template SegmentSearch(jwt_chunk_size) {
-  signal input jwt_segments[8][jwt_chunk_size];
+template SegmentSearch(chunk_count, jwt_chunk_size) {
+  signal input jwt_segments[chunk_count][jwt_chunk_size];
   signal input segment_index;
   signal output out[jwt_chunk_size];
 
@@ -18,8 +18,23 @@ template SegmentSearch(jwt_chunk_size) {
   signal seg_6_eq <== IsEqual()([segment_index, 6]);
   signal seg_7_eq <== IsEqual()([segment_index, 7]);
   signal seg_8_eq <== IsEqual()([segment_index, 8]);
+  signal seg_9_eq <== IsEqual()([segment_index, 9]);
+  signal seg_10_eq <== IsEqual()([segment_index, 10]);
+  signal seg_11_eq <== IsEqual()([segment_index, 11]);
+  signal seg_12_eq <== IsEqual()([segment_index, 12]);
+  signal seg_13_eq <== IsEqual()([segment_index, 13]);
+  signal seg_14_eq <== IsEqual()([segment_index, 14]);
+  signal seg_15_eq <== IsEqual()([segment_index, 15]);
 
-  signal c_7[jwt_chunk_size];
+  signal c_15[jwt_chunk_size];
+  signal c_14[jwt_chunk_size]; signal c_14_i[jwt_chunk_size];
+  signal c_13[jwt_chunk_size]; signal c_13_i[jwt_chunk_size];
+  signal c_12[jwt_chunk_size]; signal c_12_i[jwt_chunk_size];
+  signal c_11[jwt_chunk_size]; signal c_11_i[jwt_chunk_size];
+  signal c_10[jwt_chunk_size]; signal c_10_i[jwt_chunk_size];
+  signal c_9[jwt_chunk_size]; signal c_9_i[jwt_chunk_size];
+  signal c_8[jwt_chunk_size]; signal c_8_i[jwt_chunk_size];
+  signal c_7[jwt_chunk_size]; signal c_7_i[jwt_chunk_size];
   signal c_6[jwt_chunk_size]; signal c_6_i[jwt_chunk_size];
   signal c_5[jwt_chunk_size]; signal c_5_i[jwt_chunk_size];
   signal c_4[jwt_chunk_size]; signal c_4_i[jwt_chunk_size];
@@ -36,7 +51,23 @@ template SegmentSearch(jwt_chunk_size) {
         ....
       }
     **/
-    c_7[i] <== seg_7_eq * jwt_segments[7][i];
+    c_15[i] <== seg_15_eq * jwt_segments[15][i];
+    c_14_i[i] <== (1 - seg_14_eq) * c_15[i];
+    c_14[i] <== seg_14_eq * jwt_segments[14][i] + c_14_i[i];
+    c_13_i[i] <== (1 - seg_13_eq) * c_14[i];
+    c_13[i] <== seg_13_eq * jwt_segments[13][i] + c_13_i[i];
+    c_12_i[i] <== (1 - seg_12_eq) * c_13[i];
+    c_12[i] <== seg_12_eq * jwt_segments[12][i] + c_12_i[i];
+    c_11_i[i] <== (1 - seg_11_eq) * c_12[i];
+    c_11[i] <== seg_11_eq * jwt_segments[11][i] + c_11_i[i];
+    c_10_i[i] <== (1 - seg_10_eq) * c_11[i];
+    c_10[i] <== seg_10_eq * jwt_segments[10][i] + c_10_i[i];
+    c_9_i[i] <== (1 - seg_9_eq) * c_10[i];
+    c_9[i] <== seg_9_eq * jwt_segments[9][i] + c_9_i[i];
+    c_8_i[i] <== (1 - seg_8_eq) * c_9[i];
+    c_8[i] <== seg_8_eq * jwt_segments[8][i] + c_8_i[i];
+    c_7_i[i] <== (1 - seg_7_eq) * c_8[i];
+    c_7[i] <== seg_7_eq * jwt_segments[7][i] + c_7_i[i];
     c_6_i[i] <== (1 - seg_6_eq) * c_7[i];
     c_6[i] <== seg_6_eq * jwt_segments[6][i] + c_6_i[i];
     c_5_i[i] <== (1 - seg_5_eq) * c_6[i];
@@ -77,8 +108,8 @@ template ConcatJwtSegments(jwt_chunk_size) {
 /// original single JWT byte array. It will then decide which two segments to merge into one. Our circuits works with
 /// base64 encoded values of max length `jwt_chunk_size` which most likely be 100. So we know that the encoded value
 /// will at most span across 2 of the below segments.
-template JwtSlice(jwt_chunk_size) {
-  signal input jwt_segments[8][jwt_chunk_size];
+template JwtSlice(chunk_count, jwt_chunk_size) {
+  signal input jwt_segments[chunk_count][jwt_chunk_size];
   signal input start;
   signal input end;
 
@@ -89,8 +120,8 @@ template JwtSlice(jwt_chunk_size) {
   signal end_segment_index <== IntegerDivision(10)(end, jwt_chunk_size);
 
   /// Find the two segments
-  signal segment_1[jwt_chunk_size] <== SegmentSearch(jwt_chunk_size)(jwt_segments, first_segment_index);
-  signal segment_2[jwt_chunk_size] <== SegmentSearch(jwt_chunk_size)(jwt_segments, end_segment_index);
+  signal segment_1[jwt_chunk_size] <== SegmentSearch(chunk_count, jwt_chunk_size)(jwt_segments, first_segment_index);
+  signal segment_2[jwt_chunk_size] <== SegmentSearch(chunk_count, jwt_chunk_size)(jwt_segments, end_segment_index);
 
   out <== ConcatJwtSegments(jwt_chunk_size)(segment_1, segment_2);
 }

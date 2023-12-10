@@ -6,3 +6,15 @@ pragma circom 2.1.6;
 function null_char() {
   return 128;
 }
+
+function colon_ascii() {
+  return 58;
+}
+
+function quote_ascii() {
+  return 34;
+}
+
+function comma_ascii() {
+  return 44;
+}

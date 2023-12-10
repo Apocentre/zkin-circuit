@@ -4,7 +4,7 @@ const splitJWT = (jwt) => {
 
   while (jwt.length) {
     i++;
-    const chunk = jwt.splice(0, 128);
+    const chunk = jwt.splice(0, 64);
     result.push(chunk);
   }
 

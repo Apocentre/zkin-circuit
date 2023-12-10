@@ -5,17 +5,18 @@ include "circomlib/circuits/bitify.circom";
 include "@zk-email/circuits/helpers/rsa.circom";
 
 /// Sha256 hashes the padded message
-template RsaSha256(max_msg_bytes, msg_chunk_size, n, k) {
-  signal input msg_segments[8][msg_chunk_size];
+template RsaSha256(chunk_count, msg_chunk_size, n, k) {
+  signal input msg_segments[chunk_count][msg_chunk_size];
   signal input msg_padded_bytes;
   signal input modulus[k];
   signal input signature[k];
 
   signal output out[n];
 
+  var max_msg_bytes = chunk_count * msg_chunk_size;
   signal message[max_msg_bytes];
 
-  for(var i = 0; i < 8; i++) {
+  for(var i = 0; i < chunk_count; i++) {
     for(var j = 0; j < msg_chunk_size; j++) {
       var index = i * msg_chunk_size + j;
       message[index] <== msg_segments[i][j];
