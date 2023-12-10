@@ -18,7 +18,6 @@ template JwtDecoder(max_jwt_bytes, max_json_bytes, jwt_ascii_chunk_size) {
   for (var i = 0; i < max_jwt_bytes - 1; i++) {
     // is dot?
     eqs[i] <== GreaterEqThan(15)([i, dot_index]);
-    
     normal_bytes[i] <== (1 - eqs[i]) * jwt[i];
     jwt_ascii.in[i] <== eqs[i] * jwt[i + 1] + normal_bytes[i];
   }
@@ -29,6 +28,7 @@ template JwtDecoder(max_jwt_bytes, max_json_bytes, jwt_ascii_chunk_size) {
   signal buffer[max_json_bytes + 2];
   for(var i = 0; i < max_json_bytes; i++) {
     buffer[i] <== jwt_ascii.out[i];
+    log(jwt_ascii.out[i]);
   }
 
   // 2. pad last 2 items with 0

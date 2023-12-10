@@ -4,6 +4,7 @@ include "./crypto/rsa_sha256.circom";
 include "./jwt/jwt_decoder.circom";
 include "./jwt/inclusion.circom";
 include "./math/integer_div.circom";
+include "./collections/filter_zeros.circom";
 
 template ZkAuth(
   max_claim_size,
@@ -22,10 +23,17 @@ template ZkAuth(
   signal input sub_loc;
   signal input aud_loc;
   signal input aud_len;
-  signal input modulus[k]; // jwt provider rsa pubkey
+  signal input modulus[k]; // jwt provider rsa  pubkey
   signal input signature[k];
 
-  // 1. Decode the entire jwt token
+  // 1. verify the signature
+  component rsa_sha256 = RsaSha256(max_jwt_bytes, n, k);
+  rsa_sha256.message <== jwt;
+  rsa_sha256.msg_padded_bytes <== jwt_padded_bytes;
+  rsa_sha256.modulus <== modulus;
+  rsa_sha256.signature <== signature;
+
+  // 2. Decode the entire jwt token
   var chunk_count = (max_json_bytes + 2) / jwt_ascii_chunk_size;
   signal jwt_ascii[chunk_count][jwt_ascii_chunk_size] <== JwtDecoder(
     max_jwt_bytes, max_json_bytes, jwt_ascii_chunk_size
@@ -42,13 +50,6 @@ template ZkAuth(
   sub_jwt_inclusion.jwt_ascii <== jwt_ascii;
   sub_jwt_inclusion.claim <== sub;
   sub_jwt_inclusion.claim_loc <== sub_loc;
-
-  // 5. verify the signature
-  component rsa_sha256 = RsaSha256(max_jwt_bytes, n, k);
-  rsa_sha256.message <== jwt;
-  rsa_sha256.msg_padded_bytes <== jwt_padded_bytes;
-  rsa_sha256.modulus <== modulus;
-  rsa_sha256.signature <== signature;
 }
 
 

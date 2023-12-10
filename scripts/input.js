@@ -1,8 +1,8 @@
 const {writeFile} = require("fs/promises");
 const assert = require("assert");
 const data = require("./data.json");
-const {findClaimLocation, findDotIndex} = require("./claim_loc.js");
-const {getJwtBytes} = require("./binary.js");
+const {findClaimLocation} = require("./claim_loc.js");
+const {getClaimByteArray, padJwtHeader} = require("./jwt.js");
 const {getPubkey} = require("./jwks.js");
 
 // circom constants from main.circom / https://zkrepl.dev/?gist=30d21c7a7285b1b14f608325f172417b
@@ -84,22 +84,23 @@ const sha256Pad = async (prehash_prepad_m, maxShaBytes) => {
 
 const createInputs = async (msg=data.jwt, sig=data.sig) => {
   const signature = toCircomBigIntBytes(BigInt(`0x${Buffer.from(sig, "base64").toString("hex")}`));
-  const [jwtPadded, jwtPaddedLen] = await sha256Pad(new TextEncoder().encode(msg), MAX_MSG_PADDED_BYTES);
+  const jwtByteArray = new TextEncoder().encode(msg);
+  const [jwtPadded, jwtPaddedLen] = await sha256Pad(jwtByteArray, MAX_MSG_PADDED_BYTES);
   const jwt_padded_bytes = jwtPaddedLen.toString();
-  const jwt = await Uint8ArrayToCharArray(jwtPadded); 
-  const dot_index = findDotIndex(data.jwt);
-  const iss_loc = findClaimLocation(data.jwt, data.iss);
-  const sub_loc = findClaimLocation(getJwtBytes);
-  const aud_loc = findClaimLocation(data.jwt, data.aud);  
+  const jwt = await Uint8ArrayToCharArray(jwtPadded);
+  const [dot_index, padCount, jwtWithHeaderPadding] = padJwtHeader(jwt);
+  const iss_loc = findClaimLocation(msg, data.iss, padCount);
+  const sub_loc = findClaimLocation(msg, data.sub, padCount);
+  const aud_loc = findClaimLocation(msg, data.aud, padCount);  
   const rsaPubkey = toCircomBigIntBytes(await getPubkey(data.jwt));
 
   const inputs = {
-    jwt: getJwtBytes(data.jwt),
+    jwt: jwtWithHeaderPadding,
     jwt_padded_bytes,
     dot_index,
-    iss: data.iss,
+    iss: getClaimByteArray(data.iss),
     iss_loc,
-    sub: data.sub,
+    sub: getClaimByteArray(data.sub),
     sub_loc,
     aud_loc,
     aud_len: data.sub.length,

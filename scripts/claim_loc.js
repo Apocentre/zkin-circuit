@@ -11,23 +11,37 @@ const fromByteArray = (byteArray) => {
   return utf8Decode.decode(byteArray)
 }
 
-const findDotIndex = (jwt) => {
-  const index = jwt.indexOf(".");
-  assert(index != -1);
+const getSubArrayIndex = (haystack, needle) => {
+  outer:
+  for(let i = 0; i <= haystack.length - needle.length; ++i) {
+    for (let j = 0; j < needle.length; ++j) {
+      if (haystack[i + j] != needle[j]) {
+        continue outer;
+      }
+    }
 
-  return index;
+    return i;
+  }
+
+  return -1;
 }
 
-const findClaimLocation = (jwt, claim) => {
+const asciiArrayToString = (arr) => {
+  let str = "";
+  for (let i = 0; i < arr.length; i++) {
+    str += String.fromCharCode(arr[i]);
+  }
+
+  return str;
+}
+
+const findClaimLocation = (jwt, claim, padCount) => {
   const header = jwt.split(".")[0];
   const payload = jwt.split(".")[1];
-
-  console.log(`${header}${payload}`);
-  const jwt_without_dot = JSON.parse(atob(`${header}${payload}`));
-  const index =  jwt_without_dot.indexOf(claim);
+  const index = atob(payload).indexOf(claim);
   assert(index != -1);
 
-  return index;
+  return index + padCount + header.length;
 }
 
 const findB64ClaimLocation = (jwt, claim) => {
@@ -83,4 +97,4 @@ const findB64ClaimLocation = (jwt, claim) => {
   return [claimBytes.map(v => v.toString()), claimLocation, isPadded, offset]
 }
 
-module.exports = {findClaimLocation, findDotIndex};
+module.exports = {findClaimLocation};
