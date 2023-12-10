@@ -2,7 +2,7 @@ const {writeFile} = require("fs/promises");
 const assert = require("assert");
 const data = require("./data.json");
 const {findClaimLocation} = require("./claim_loc.js");
-const {splitJWT} = require("./split_jwt.js");
+const {getClaimByteArray, padJwtHeader} = require("./jwt.js");
 const {getPubkey} = require("./jwks.js");
 
 // circom constants from main.circom / https://zkrepl.dev/?gist=30d21c7a7285b1b14f608325f172417b
@@ -84,26 +84,26 @@ const sha256Pad = async (prehash_prepad_m, maxShaBytes) => {
 
 const createInputs = async (msg=data.jwt, sig=data.sig) => {
   const signature = toCircomBigIntBytes(BigInt(`0x${Buffer.from(sig, "base64").toString("hex")}`));
-  const [jwtPadded, jwtPaddedLen] = await sha256Pad(new TextEncoder().encode(msg), MAX_MSG_PADDED_BYTES);
+  const jwtByteArray = new TextEncoder().encode(msg);
+  const [jwtPadded, jwtPaddedLen] = await sha256Pad(jwtByteArray, MAX_MSG_PADDED_BYTES);
   const jwt_padded_bytes = jwtPaddedLen.toString();
-  const jwt = await Uint8ArrayToCharArray(jwtPadded); 
-  const issClaim = findClaimLocation(data.jwt, data.iss);
-  const subClaim = findClaimLocation(data.jwt, data.sub);
-  const audClaim = findClaimLocation(data.jwt, data.aud);  
+  const jwt = await Uint8ArrayToCharArray(jwtPadded);
+  const [dot_index, padCount, jwtWithHeaderPadding] = padJwtHeader(jwt);
+  const iss_loc = findClaimLocation(msg, data.iss, padCount);
+  const sub_loc = findClaimLocation(msg, data.sub, padCount);
+  const aud_loc = findClaimLocation(msg, data.aud, padCount);  
   const rsaPubkey = toCircomBigIntBytes(await getPubkey(data.jwt));
 
   const inputs = {
-    jwt_segments: splitJWT(jwt),
+    jwt: jwtWithHeaderPadding,
     jwt_padded_bytes,
-    iss: issClaim[0],
-    iss_loc: issClaim[1],
-    iss_padded: issClaim[2],
-    sub: subClaim[0],
-    sub_loc: subClaim[1],
-    sub_padded: subClaim[2],
-    aud_loc: audClaim[1],
-    aud_len: audClaim[0].length,
-    aud_offset: audClaim[3],
+    dot_index,
+    iss: getClaimByteArray(data.iss),
+    iss_loc,
+    sub: getClaimByteArray(data.sub),
+    sub_loc,
+    aud_loc,
+    aud_len: data.sub.length,
     signature,
     modulus: rsaPubkey,
   }
