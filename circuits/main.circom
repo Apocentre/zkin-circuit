@@ -17,8 +17,8 @@ template ZkAuth(
   signal input jwt_segments[chunk_count][jwt_chunk_size];
   signal input jwt_padded_bytes; // length of the jwt including the padding
 
-  signal input iss[max_claim_size];
-  signal input sub[max_claim_size];
+  signal input iss[max_claim_bytes];
+  signal input sub[max_claim_bytes];
   signal input iss_loc;
   signal input sub_loc;
   signal input aud_loc;
