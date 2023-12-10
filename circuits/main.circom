@@ -22,14 +22,12 @@ template ZkAuth(
   signal input iss_loc;
   signal input sub_loc;
   signal input aud_loc;
-  signal input aud_loc;
   signal input modulus[k]; // jwt provider rsa pubkey
   signal input signature[k];
 
 
   // 4. verify the signature
-  var max_jwt_bytes = chunk_count * jwt_chunk_size;
-  component rsa_sha256 = RsaSha256(max_jwt_bytes, jwt_chunk_size, n, k);
+  component rsa_sha256 = RsaSha256(chunk_count, jwt_chunk_size, n, k);
   rsa_sha256.msg_padded_bytes <== jwt_padded_bytes;
   rsa_sha256.msg_segments <== jwt_segments;
   rsa_sha256.modulus <== modulus;
@@ -37,5 +35,5 @@ template ZkAuth(
 }
 
 
-// base64 encoded value has len = 4/3 * ascii_string_len
-component main {public [iss, iss_loc]} = ZkAuth(128, 64, 128, 16, 121, 17);
+// the max claim b64 len is 64 but the decoded one is var  64 = (4/3)*(N + 2) => N = 88
+component main {public [iss, iss_loc]} = ZkAuth(88, 64, 64, 16, 121, 17);

@@ -19,7 +19,7 @@ template ClaimVerifier(
   signal selections[max_encoded_claim_size];
   signal assertions[max_encoded_claim_size];
 
-  // verify that the entier clzaim is inluded in the JWT
+  // 1. verify that the entier clzaim is inluded in the JWT
   for(var i = 0; i < max_claim_bytes; i++) {
     selections[i] <== AtIndex(jwt_segment_len)(jwt, claim_loc + i);
 
@@ -28,5 +28,7 @@ template ClaimVerifier(
     assertions[i] === 1;
   }
   
+  // 2. Decode the b64 encoded claim value
   component claim_ascii = Base64Decode(max_claim_json_bytes);
+  claim_ascii.in <== claim;
 }
