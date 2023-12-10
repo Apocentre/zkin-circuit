@@ -1,6 +1,6 @@
 const assert = require("assert");
 const {
-  COMMA_ASCII, COLON_ASCII, QUOTE_ASCII,
+  MAX_CLAIM_BYTES
 } = require("./constants");
 
 const toByteArray = (str) => {
@@ -8,24 +8,19 @@ const toByteArray = (str) => {
   return utf8Encode.encode(str)
 }
 
-const fromByteArray = (byteArray) => {
-  let utf8Decode = new TextDecoder();
-  return utf8Decode.decode(byteArray)
-}
-
 const findClaimLocation = (jwt, claim) => {
   const jwtBytes = toByteArray(jwt);
 
   // generate the text at all possible possible version
   let clean_test = btoa(claim).replaceAll("=", "");
-  let quote_at_0_index = btoa(fromByteArray(new Uint8Array([QUOTE_ASCII, ...claim]))).replaceAll("=", "");
-  let colon_at_0_index = btoa(fromByteArray(new Uint8Array([COLON_ASCII, ...claim]))).replaceAll("=", "");
-  let colon_and_quote_at_start = btoa(fromByteArray(new Uint8Array([COLON_ASCII, QUOTE_ASCII, ...claim]))).replaceAll("=", "");
-  let comma_at_the_end = btoa(fromByteArray(new Uint8Array([...claim, COMMA_ASCII]))).replaceAll("=", "");
-  let quote_at_start_and_end = btoa(fromByteArray(new Uint8Array([QUOTE_ASCII, ...claim, QUOTE_ASCII]))).replaceAll("=", "");
-  let quote_and_comma_at_end = btoa(fromByteArray(new Uint8Array([...claim, QUOTE_ASCII, COMMA_ASCII]))).replaceAll("=", "");
-  let comma_and_quote_at_end = btoa(fromByteArray(new Uint8Array([...claim, COMMA_ASCII, QUOTE_ASCII]))).replaceAll("=", "");
-  let colon_at_start_and_comma_at_end = btoa(fromByteArray(new Uint8Array([COLON_ASCII, ...claim, COMMA_ASCII]))).replaceAll("=", "");
+  let quote_at_0_index = btoa(`"${claim}`).replaceAll("=", "");
+  let colon_at_0_index = btoa(`:${claim}`).replaceAll("=", "");
+  let colon_and_quote_at_start = btoa(`:"${claim}`).replaceAll("=", "");
+  let comma_at_the_end = btoa(`${claim},`).replaceAll("=", "");
+  let quote_at_start_and_end = btoa(`"${claim}"`).replaceAll("=", "");
+  let quote_and_comma_at_end = btoa(`${claim}",`).replaceAll("=", "");
+  let comma_and_quote_at_end = btoa(`${claim},"`).replaceAll("=", "");
+  let colon_at_start_and_comma_at_end =  btoa(`:${claim},`).replaceAll("=", "");
 
   const versions = [
     clean_test, quote_at_0_index, colon_at_0_index, colon_and_quote_at_start, comma_at_the_end, quote_at_start_and_end,
@@ -43,9 +38,9 @@ const findClaimLocation = (jwt, claim) => {
     }
   }
 
-  const claimBytes = toByteArray(version);
-  for (let i = claimLocation, j = 0; i < claimLocation + actual.length; i++, j++) {
-    assert(jwtBytes[i] === actual[j]);
+  let claimBytes = toByteArray(version);
+  for (let i = claimLocation, j = 0; i < claimLocation + claimBytes.length; i++, j++) {
+    assert(jwtBytes[i] === claimBytes[j]);
   }
 
   const len = claimBytes.length;
