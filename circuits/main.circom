@@ -40,8 +40,8 @@ template ZkAuth(
   signal sub_ascii[max_claim_json_bytes] <== ClaimInclusion(
     max_claim_bytes, max_claim_json_bytes, jwt_chunk_size, chunk_count
   )(jwt_segments, sub, sub_loc);
+  
   aud_out <== ClaimInclusion(max_claim_bytes, max_claim_json_bytes, jwt_chunk_size, chunk_count)(jwt_segments, aud, aud_loc);
-
 }
 
 // the max claim b64 len is 64 but the decoded one is var  64 = (4/3)*(N + 2) => N = 88
