@@ -17,6 +17,7 @@ template ZkAuth(
 
   signal input iss[max_claim_bytes];
   signal input sub[max_claim_bytes];
+  signal input aud[max_claim_bytes];
   signal input iss_loc;
   signal input sub_loc;
   signal input aud_loc;
