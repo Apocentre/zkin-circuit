@@ -1,6 +1,7 @@
 pragma circom 2.1.6;
 
 include "../base64.circom";
+include "./claim_sanitizer.circom";
 
 
 /// Accepts a b64 encoded subsection of jwt and claim and will:
@@ -29,6 +30,8 @@ template ClaimVerifier(
   }
   
   // 2. Decode the b64 encoded claim value
-  component claim_ascii = Base64Decode(max_claim_json_bytes);
+  component claim_ascii[max_claim_json_bytes] = Base64Decode(max_claim_json_bytes);
   claim_ascii.in <== claim;
+
+  signal sanitized_claim <== ClaimSanitizer(max_claim_json_bytes)(claim_ascii.out);
 }
