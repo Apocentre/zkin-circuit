@@ -69,7 +69,7 @@ template ZkAuth(
   // 3. Extract and decode just the aud part from the jwt token
   signal jwt_slice_aud[jwt_chunk_size * 2];
   signal aud_first_segment;
-  (jwt_slice_aud, aud_first_segment) <== JwtSlice(jwt_chunk_size)(jwt_segments, aud_loc, aud_loc + aud_len);
+  (jwt_slice_aud, aud_first_segment) <== JwtSlice(jwt_chunk_size)(jwt_segments, , aud_loc + aud_len);
   
   // Decoder uses slightly but predictably different max_lengths from the encoder. The reason is that encoder works
   // with chunks of 3 but decoder with chunks of 4 so we want max_lengths to be divisible by these numbers
