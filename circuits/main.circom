@@ -28,11 +28,11 @@ template ZkAuth(
 
 
   // 1. verify the signature
-  // component rsa_sha256 = RsaSha256(chunk_count, jwt_chunk_size, n, k);
-  // rsa_sha256.msg_padded_bytes <== jwt_padded_bytes;
-  // rsa_sha256.msg_segments <== jwt_segments;
-  // rsa_sha256.modulus <== modulus;
-  // rsa_sha256.signature <== signature;
+  component rsa_sha256 = RsaSha256(chunk_count, jwt_chunk_size, n, k);
+  rsa_sha256.msg_padded_bytes <== jwt_padded_bytes;
+  rsa_sha256.msg_segments <== jwt_segments;
+  rsa_sha256.modulus <== modulus;
+  rsa_sha256.signature <== signature;
 
   // 2. prove iss inclusion
   signal iss_slice[jwt_chunk_size * 2];
