@@ -89,7 +89,9 @@ const createInputs = async (msg=data.jwt, sig=data.sig) => {
   const jwt = await Uint8ArrayToCharArray(jwtPadded); 
   const issClaim = findClaimLocation(data.jwt, data.iss);
   const subClaim = findClaimLocation(data.jwt, data.sub);
-  const audClaim = findClaimLocation(data.jwt, data.aud);  
+  const audClaim = findClaimLocation(data.jwt, data.aud);
+  const nonceClaim = findClaimLocation(data.jwt, data.nonce);
+  const expClaim = findClaimLocation(data.jwt, data.exp);
   const rsaPubkey = toCircomBigIntBytes(await getPubkey(data.jwt));
 
   const inputs = {
@@ -101,6 +103,10 @@ const createInputs = async (msg=data.jwt, sig=data.sig) => {
     sub_loc: subClaim[1],
     aud: audClaim[0],
     aud_loc: audClaim[1],
+    nonce: nonceClaim[0],
+    nonce_loc: nonceClaim[1],
+    exp: nonceClaim[0],
+    exp_loc: nonceClaim[1],
     signature,
     modulus: rsaPubkey,
   }

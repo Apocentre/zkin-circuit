@@ -31,6 +31,10 @@ template ClaimVerifier(
     
     // make sure all bytes are the same
     assertions[i] <== IsEqual()([claim[i] * is_zero[i], selections[i] * is_zero[i]]);
+
+    log("jwt", selections[i]);
+    log("claim", claim[i]);
+
     assertions[i] === 1;
   }
   
