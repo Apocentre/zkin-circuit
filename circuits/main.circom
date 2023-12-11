@@ -1,7 +1,7 @@
 pragma circom 2.1.6;
 
-
 include "./crypto/rsa_sha256.circom";
+include "./crypto/address.circom";
 include "./jwt/claim_inclusion.circom";
 include "./collections/utils.circom";
 
@@ -21,6 +21,7 @@ template ZkAuth(
   signal input aud[max_claim_bytes];
   signal input nonce[max_claim_bytes];
   signal input exp[max_claim_bytes];
+  signal input salt;
   signal input iss_loc;
   signal input sub_loc;
   signal input aud_loc;
@@ -33,6 +34,7 @@ template ZkAuth(
   signal output nonce_out[max_claim_json_bytes];
   var max_timestamp_len = 10;
   signal output exp_out[max_timestamp_len];
+  signal output address;
 
   // 1. verify the signature
   component rsa_sha256 = RsaSha256(chunk_count, jwt_chunk_size, n, k);
@@ -45,6 +47,7 @@ template ZkAuth(
   signal iss_ascii[max_claim_json_bytes] <== ClaimInclusion(
     max_claim_bytes, max_claim_json_bytes, jwt_chunk_size, chunk_count
   )(jwt_segments, iss, iss_loc);
+
   signal sub_ascii[max_claim_json_bytes] <== ClaimInclusion(
     max_claim_bytes, max_claim_json_bytes, jwt_chunk_size, chunk_count
   )(jwt_segments, sub, sub_loc);
@@ -55,7 +58,12 @@ template ZkAuth(
   signal exp_ascii[max_claim_json_bytes] <== ClaimInclusion(
     max_claim_bytes, max_claim_json_bytes, jwt_chunk_size, chunk_count
   )(jwt_segments, exp, exp_loc);
-  exp_out <== CopyArray(max_claim_json_bytes, max_timestamp_len)(exp_ascii); 
+  
+  exp_out <== CopyArray(max_claim_json_bytes, max_timestamp_len)(exp_ascii);
+
+  address <== Address(max_claim_json_bytes)(sub_ascii, iss_ascii, aud_out, salt);
+
+  log("address ---> ", address);
 }
 
 // the max claim b64 len is 64 but the decoded one is  78 = (4/3)*(N + 2) => N = 104
