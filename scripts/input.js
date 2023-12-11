@@ -89,7 +89,7 @@ const createRandomSalt = () => {
   const hash = createHash("sha256");
   hash.update(salt);
   
-  return hash.digest("hex");
+  return toCircomBigIntBytes(BigInt(`0x${hash.digest("hex")}`)).slice(0, CIRCOM_BIGINT_K - 1);
 }
 
 const createInputs = async (msg=data.jwt, sig=data.sig) => {

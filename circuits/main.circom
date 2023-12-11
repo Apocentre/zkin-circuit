@@ -21,12 +21,12 @@ template ZkAuth(
   signal input aud[max_claim_bytes];
   signal input nonce[max_claim_bytes];
   signal input exp[max_claim_bytes];
-  signal input salt;
   signal input iss_loc;
   signal input sub_loc;
   signal input aud_loc;
   signal input nonce_loc;
   signal input exp_loc;
+  signal input salt[16];
   signal input modulus[k]; // jwt provider rsa pubkey
   signal input signature[k];
 
@@ -61,7 +61,7 @@ template ZkAuth(
   
   exp_out <== CopyArray(max_claim_json_bytes, max_timestamp_len)(exp_ascii);
 
-  address <== Address(max_claim_json_bytes)(sub_ascii, iss_ascii, aud_out, salt);
+  address <== Address(max_claim_json_bytes, k)(sub_ascii, iss_ascii, aud_out, salt);
 
   log("address ---> ", address);
 }
