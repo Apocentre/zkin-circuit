@@ -6,13 +6,7 @@ include "circomlib/circuits/comparators.circom";
 template NotEqual() {
   signal input in[2];
   signal output out;
+  signal is_zero <== IsZero()(in[0] - in[1]);
 
-  component isEq = IsEqual();
-  isEq.in[0] <== in[0];
-  isEq.in[1] <== in[1];
-
-  // TODO: is this under-constrained?
-  signal result <-- isEq.out == 1 ? 0 : 1;
-  
-  out <== result;
+  out <== -1 * is_zero + 1;
 }
