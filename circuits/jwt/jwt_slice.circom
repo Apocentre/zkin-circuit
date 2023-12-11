@@ -39,24 +39,6 @@ template ConcatJwtSegments(jwt_chunk_size) {
   }
 }
 
-template AppendJwtSegment(jwt_chunk_size) {
-  var source_len = jwt_chunk_size * 2;
-  var final_len = jwt_chunk_size * 3;
-
-  signal input source[source_len];
-  signal input segment_2[jwt_chunk_size];
-
-  signal output out[final_len];
-
-  for(var i = 0; i < source_len; i++) {
-    out[i] <== source[i];
-  }
-  
-  for(var i = 0; i < jwt_chunk_size; i++) {
-    out[i + source_len] <== segment_2[i];
-  }
-}
-
 /// For optimization reasons we split the jwt into 10 smaller parts each having one segment of. These
 /// parts are in the order as the bytes appear in the origin JWT byte array.
 /// This circuit will accept all jwt segments, as well as, the start index and end index that correspons to the
