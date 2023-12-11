@@ -35,27 +35,27 @@ template ZkAuth(
   signal output exp_out[max_timestamp_len];
 
   // 1. verify the signature
-  // component rsa_sha256 = RsaSha256(chunk_count, jwt_chunk_size, n, k);
-  // rsa_sha256.msg_padded_bytes <== jwt_padded_bytes;
-  // rsa_sha256.msg_segments <== jwt_segments;
-  // rsa_sha256.modulus <== modulus;
-  // rsa_sha256.signature <== signature;
+  component rsa_sha256 = RsaSha256(chunk_count, jwt_chunk_size, n, k);
+  rsa_sha256.msg_padded_bytes <== jwt_padded_bytes;
+  rsa_sha256.msg_segments <== jwt_segments;
+  rsa_sha256.modulus <== modulus;
+  rsa_sha256.signature <== signature;
 
   // 2. prove claims inclusions
-  // signal iss_ascii[max_claim_json_bytes] <== ClaimInclusion(
-  //   max_claim_bytes, max_claim_json_bytes, jwt_chunk_size, chunk_count
-  // )(jwt_segments, iss, iss_loc);
-  // signal sub_ascii[max_claim_json_bytes] <== ClaimInclusion(
-  //   max_claim_bytes, max_claim_json_bytes, jwt_chunk_size, chunk_count
-  // )(jwt_segments, sub, sub_loc);
+  signal iss_ascii[max_claim_json_bytes] <== ClaimInclusion(
+    max_claim_bytes, max_claim_json_bytes, jwt_chunk_size, chunk_count
+  )(jwt_segments, iss, iss_loc);
+  signal sub_ascii[max_claim_json_bytes] <== ClaimInclusion(
+    max_claim_bytes, max_claim_json_bytes, jwt_chunk_size, chunk_count
+  )(jwt_segments, sub, sub_loc);
   
   aud_out <== ClaimInclusion(max_claim_bytes, max_claim_json_bytes, jwt_chunk_size, chunk_count)(jwt_segments, aud, aud_loc);
-  // nonce_out <== ClaimInclusion(max_claim_bytes, max_claim_json_bytes, jwt_chunk_size, chunk_count)(jwt_segments, nonce, nonce_loc);
+  nonce_out <== ClaimInclusion(max_claim_bytes, max_claim_json_bytes, jwt_chunk_size, chunk_count)(jwt_segments, nonce, nonce_loc);
   
-  // signal exp_ascii[max_claim_json_bytes] <== ClaimInclusion(
-  //   max_claim_bytes, max_claim_json_bytes, jwt_chunk_size, chunk_count
-  // )(jwt_segments, exp, exp_loc);
-  // exp_out <== CopyArray(max_claim_json_bytes, max_timestamp_len)(exp_ascii);
+  signal exp_ascii[max_claim_json_bytes] <== ClaimInclusion(
+    max_claim_bytes, max_claim_json_bytes, jwt_chunk_size, chunk_count
+  )(jwt_segments, exp, exp_loc);
+  exp_out <== CopyArray(max_claim_json_bytes, max_timestamp_len)(exp_ascii); 
 }
 
 // the max claim b64 len is 64 but the decoded one is  64 = (4/3)*(N + 2) => N = 88
