@@ -67,4 +67,4 @@ template ZkAuth(
 }
 
 // the max claim b64 len is 64 but the decoded one is  78 = (4/3)*(N + 2) => N = 104
-component main {public [iss, iss_loc]} = ZkAuth(104, 78, 64, 16, 121, 17);
+component main {public [iss, iss_loc]} = ZkAuth(104, 78, 16, 64, 121, 17);

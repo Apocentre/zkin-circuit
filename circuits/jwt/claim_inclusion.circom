@@ -14,7 +14,7 @@ template ClaimInclusion(
   signal input claim_loc;
   signal output out[max_claim_json_bytes];
 
-  var claim_slice_len = jwt_chunk_size * 3;
+  var claim_slice_len = jwt_chunk_size * 8;
   signal claim_slice[claim_slice_len];
   signal claim_first_segment;
   (claim_slice, claim_first_segment) <== JwtSlice(chunk_count, jwt_chunk_size)(jwt_segments, claim_loc, claim_loc + jwt_chunk_size);
