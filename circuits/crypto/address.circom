@@ -7,24 +7,35 @@ include "circomlib/circuits/poseidon.circom";
 // changes then we would need to adapt the hardcoded values too
 template Chunk(max_claim_json_bytes) {
   signal input in[max_claim_json_bytes];
-  signal output out[6][13];
+  signal output out[5][16];
 
-  for(var i = 0; i < max_claim_json_bytes; i += 13) {
-    var chunk = i / 13;
-    for(var j = 0; j < 13; j++) {
+  // copy the first 64 bytes
+  for(var i = 0; i < max_claim_json_bytes - 16; i += 16) {
+    var chunk = i / 16;
+    for(var j = 0; j < 16; j++) {
       out[chunk][j] <== in[j + i];
     }
   }
+
+  // copy the reamining 14 bytes
+  for(var i = 0; i < max_claim_json_bytes - 64; i++) {
+    out[4][i] <== in[i];
+  }
+
+  // pad the with two more 2 bytes
+  out[4][14] <== 0;
+  out[4][15] <== 0;
+
 }
 
 template HashChunks() {
-  signal input chunks[6][13];
+  signal input chunks[5][16];
   signal output out;
 
-  component final_hash = Poseidon(6);
+  component final_hash = Poseidon(5);
 
-  for(var i = 0; i < 6; i++) {
-    final_hash.inputs[i] <== Poseidon(13)(chunks[i]);
+  for(var i = 0; i < 5; i++) {
+    final_hash.inputs[i] <== Poseidon(16)(chunks[i]);
   }
 
   out <== final_hash.out;
