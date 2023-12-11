@@ -68,7 +68,7 @@ template JwtSlice(chunk_count, jwt_chunk_size) {
   signal input start;
   signal input end;
 
-  signal output out[jwt_chunk_size * 3];
+  signal output out[jwt_chunk_size * 8];
   signal output first_segment_index;
 
   first_segment_index <== IntegerDivision(10)(start, jwt_chunk_size);
@@ -77,9 +77,18 @@ template JwtSlice(chunk_count, jwt_chunk_size) {
   signal segment_1[jwt_chunk_size] <== SegmentSearch(chunk_count, jwt_chunk_size)(jwt_segments, first_segment_index);
   signal segment_2[jwt_chunk_size] <== SegmentSearch(chunk_count, jwt_chunk_size)(jwt_segments, first_segment_index + 1);
   signal segment_3[jwt_chunk_size] <== SegmentSearch(chunk_count, jwt_chunk_size)(jwt_segments, first_segment_index + 2);
+  signal segment_4[jwt_chunk_size] <== SegmentSearch(chunk_count, jwt_chunk_size)(jwt_segments, first_segment_index + 3);
+  signal segment_5[jwt_chunk_size] <== SegmentSearch(chunk_count, jwt_chunk_size)(jwt_segments, first_segment_index + 4);
+  signal segment_6[jwt_chunk_size] <== SegmentSearch(chunk_count, jwt_chunk_size)(jwt_segments, first_segment_index + 5);
+  signal segment_7[jwt_chunk_size] <== SegmentSearch(chunk_count, jwt_chunk_size)(jwt_segments, first_segment_index + 6);
+  signal segment_8[jwt_chunk_size] <== SegmentSearch(chunk_count, jwt_chunk_size)(jwt_segments, first_segment_index + 7);
 
-  out <== AppendJwtSegment(jwt_chunk_size)(
-    ConcatJwtSegments(jwt_chunk_size)(segment_1, segment_2),
-    segment_3
-  );
+  signal seg_1_2[jwt_chunk_size * 2] <== ConcatJwtSegments(jwt_chunk_size)(segment_1, segment_2);
+  signal seg_3_4[jwt_chunk_size * 2] <== ConcatJwtSegments(jwt_chunk_size)(segment_3, segment_4);
+  signal seg_5_6[jwt_chunk_size * 2] <== ConcatJwtSegments(jwt_chunk_size)(segment_5, segment_6);
+  signal seg_7_8[jwt_chunk_size * 2] <== ConcatJwtSegments(jwt_chunk_size)(segment_7, segment_8);
+  signal seg_1_2_3_4[jwt_chunk_size * 4] <== ConcatJwtSegments(jwt_chunk_size * 2)(seg_1_2, seg_3_4);
+  signal seg_5_6_7_8[jwt_chunk_size * 4] <== ConcatJwtSegments(jwt_chunk_size * 2)(seg_5_6, seg_7_8);
+
+  out <== ConcatJwtSegments(jwt_chunk_size * 4)(seg_1_2_3_4, seg_5_6_7_8);
 }
