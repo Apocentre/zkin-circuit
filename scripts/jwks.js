@@ -4,7 +4,7 @@ const jwks = require("jwks-rsa");
 const getPubkey = async (jwt) => {
   const header = JSON.parse(atob(jwt.split(".")[0]));
   const google_jwks = jwks({
-    jwksUri: "https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com",
+    jwksUri: "https://www.googleapis.com/oauth2/v3/certs",
   });
 
   const key = await google_jwks.getSigningKey(header.kid);

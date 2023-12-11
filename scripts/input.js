@@ -1,5 +1,7 @@
 const {writeFile} = require("fs/promises");
 const assert = require("assert");
+const {v4: uuidv4} = require("uuid");
+const {createHash} = require("crypto");
 const data = require("./data.json");
 const {findClaimLocation} = require("./claim_loc.js");
 const {splitJWT} = require("./split_jwt.js");
@@ -82,6 +84,14 @@ const sha256Pad = async (prehash_prepad_m, maxShaBytes) => {
   return [prehash_prepad_m, messageLen];
 }
 
+const createRandomSalt = () => {
+  const salt = uuidv4();
+  const hash = createHash("sha256");
+  hash.update(salt);
+  
+  return toCircomBigIntBytes(BigInt(`0x${hash.digest("hex")}`)).slice(0, CIRCOM_BIGINT_K - 1);
+}
+
 const createInputs = async (msg=data.jwt, sig=data.sig) => {
   const signature = toCircomBigIntBytes(BigInt(`0x${Buffer.from(sig, "base64").toString("hex")}`));
   const [jwtPadded, jwtPaddedLen] = await sha256Pad(new TextEncoder().encode(msg), MAX_MSG_PADDED_BYTES);
@@ -89,8 +99,11 @@ const createInputs = async (msg=data.jwt, sig=data.sig) => {
   const jwt = await Uint8ArrayToCharArray(jwtPadded); 
   const issClaim = findClaimLocation(data.jwt, data.iss);
   const subClaim = findClaimLocation(data.jwt, data.sub);
-  const audClaim = findClaimLocation(data.jwt, data.aud);  
+  const audClaim = findClaimLocation(data.jwt, data.aud);
+  const nonceClaim = findClaimLocation(data.jwt, data.nonce);
+  const expClaim = findClaimLocation(data.jwt, data.exp);
   const rsaPubkey = toCircomBigIntBytes(await getPubkey(data.jwt));
+  const salt = createRandomSalt();
 
   const inputs = {
     jwt_segments: splitJWT(jwt),
@@ -101,6 +114,11 @@ const createInputs = async (msg=data.jwt, sig=data.sig) => {
     sub_loc: subClaim[1],
     aud: audClaim[0],
     aud_loc: audClaim[1],
+    nonce: nonceClaim[0],
+    nonce_loc: nonceClaim[1],
+    exp: expClaim[0],
+    exp_loc: expClaim[1],
+    salt,
     signature,
     modulus: rsaPubkey,
   }
