@@ -5,7 +5,7 @@ include "./crypto/address.circom";
 include "./jwt/claim_inclusion.circom";
 include "./collections/utils.circom";
 
-template ZkAuth(
+template ZkIn(
   max_claim_bytes,
   max_claim_json_bytes,
   jwt_chunk_size,
@@ -67,4 +67,4 @@ template ZkAuth(
 }
 
 // the max claim b64 len is 64 but the decoded one is  78 = (4/3)*(N + 2) => N = 104
-component main {public [iss, iss_loc]} = ZkAuth(104, 78, 16, 64, 121, 17);
+component main {public [iss, iss_loc]} = ZkIn(104, 78, 16, 64, 121, 17);
