@@ -124,7 +124,7 @@ const createInputs = async (msg=data.jwt, sig=data.sig) => {
   }
 
   await writeFile(
-    `${__dirname}/../inputs/zk_auth.json`,
+    `${__dirname}/../inputs/zkin.json`,
     JSON.stringify(inputs, null, 2),
   )
 }

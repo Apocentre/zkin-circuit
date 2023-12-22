@@ -62,8 +62,6 @@ template ZkIn(
   exp_out <== CopyArray(max_claim_json_bytes, max_timestamp_len)(exp_ascii);
 
   address <== Address(max_claim_json_bytes, k)(sub_ascii, iss_ascii, aud_out, salt);
-
-  log("address ---> ", address);
 }
 
 // the max claim b64 len is 64 but the decoded one is  78 = (4/3)*(N + 2) => N = 104
