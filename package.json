@@ -5,7 +5,8 @@
   "author": "ppoliani <ppoliani@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "compile": "circom circuits/zkin.circom  --r1cs --sym --wasm -o build -l node_modules"
+    "compile": "circom circuits/zkin.circom --r1cs --sym --wasm -o build -l node_modules",
+    "setup": "./scripts/compile.sh"
   },
   "dependencies": {
     "@zk-email/circuits": "^3.2.2",
