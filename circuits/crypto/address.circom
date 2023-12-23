@@ -2,7 +2,7 @@ pragma circom 2.1.6;
 
 include "circomlib/circuits/poseidon.circom";
 
-// get and array of max_claim_json_bytes (e.g. 78) and splits it into 6 chunks of 13 bytes each
+// gets and array of max_claim_json_bytes (e.g. 78) and splits it into 6 chunks of 13 bytes each
 // Note these values are hardcoded and are based on the fact that max_claim_json_bytes = 78. If this values
 // changes then we would need to adapt the hardcoded values too
 template Chunk(max_claim_json_bytes) {
@@ -25,7 +25,6 @@ template Chunk(max_claim_json_bytes) {
   // pad the with two more 2 bytes
   out[4][14] <== 0;
   out[4][15] <== 0;
-
 }
 
 template HashChunks() {

@@ -24,7 +24,7 @@ template ClaimVerifier(
   signal assertions[max_claim_bytes];
   signal is_zero[max_claim_bytes];
 
-  // 1. verify that the entier clzaim is inluded in the JWT
+  // 1. verify that the entier claim is inluded in the JWT
   for(var i = 0; i < max_claim_bytes; i++) {
     selections[i] <== AtIndex(jwt_segment_len)(jwt, claim_loc + i);
     is_zero[i] <== NotEqual()([claim[i], 0]);
