@@ -32,6 +32,7 @@ include "./collections/utils.circom";
 ///
 /// # Output
 /// 
+/// * `iss_out` - The decoded value of the `iss` claim provided in the input.
 /// * `aud_out` - The decoded value of the `aud` claim provided in the input.
 /// * `nonce_out` - The decoded value of the `nonce` claim provided in the input.
 /// * `exp_out` - The decoded value of the `exp` claim provided in the input.
@@ -74,6 +75,7 @@ template ZkIn(
   signal input modulus[k]; // jwt provider rsa pubkey
   signal input signature[k];
 
+  signal output iss_out[max_claim_json_bytes];
   signal output aud_out[max_claim_json_bytes];
   signal output nonce_out[max_claim_json_bytes];
   var max_timestamp_len = 10;
@@ -89,7 +91,7 @@ template ZkIn(
   rsa_sha256.signature <== signature;
 
   // 2. prove claims inclusions
-  signal iss_ascii[max_claim_json_bytes] <== ClaimInclusion(
+  iss_out <== ClaimInclusion(
     max_claim_bytes, max_claim_json_bytes, jwt_chunk_size, chunk_count
   )(jwt_segments, iss, iss_loc);
 
@@ -105,9 +107,9 @@ template ZkIn(
   )(jwt_segments, exp, exp_loc);
   
   exp_out <== CopyArray(max_claim_json_bytes, max_timestamp_len)(exp_ascii);
-  address <== Address(max_claim_json_bytes, k)(sub_ascii, iss_ascii, aud_out, salt);
+  address <== Address(max_claim_json_bytes, k)(sub_ascii, iss_out, aud_out, salt);
   modulus_out <== Modulus()(modulus);
 }
 
 // the max claim b64 len is 64 but the decoded one is  78 = (4/3)*(N + 2) => N = 104
-component main {public [iss]} = ZkIn(104, 78, 16, 64, 121, 17);
+component main = ZkIn(104, 78, 16, 64, 121, 17);
