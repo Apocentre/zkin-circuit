@@ -105,6 +105,7 @@ const createInputs = async (msg=data.jwt, sig=data.sig) => {
   const rsaPubkey = toCircomBigIntBytes(await getPubkey(data.jwt));
   const salt = createRandomSalt();
 
+
   const inputs = {
     jwt_segments: splitJWT(jwt),
     jwt_padded_bytes,
