@@ -18,6 +18,9 @@ template ClaimSanitizer(max_claim_json_bytes) {
   signal input claim[max_claim_json_bytes];
   signal output out[max_claim_json_bytes];
 
+  log(claim[0]);
+  log(claim[max_claim_json_bytes - 1]);
+
   signal colon_at_0_index <== IsEqual()([claim[0], colon_ascii()]);
   signal quote_at_0_index <== IsEqual()([claim[0], quote_ascii()]);
   signal quote_at_1_index <== IsEqual()([claim[1], quote_ascii()]);
