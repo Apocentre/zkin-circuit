@@ -2,13 +2,11 @@ echo "Compiling zkin.circom..."
 
 circom circuits/zkin.circom  --r1cs --sym --wasm -o build -l node_modules
 
-PTAU = 21
-
-if [ -f ./ptau/powersOfTau28_hez_final_${PTAU}.ptau ]; then
-    echo "----- powersOfTau28_hez_final_${PTAU}.ptau already exists -----"
+if [ -f ./build/ptau/powersOfTau28_hez_final_20.ptau ]; then
+    echo "----- powersOfTau28_hez_final_20.ptau already exists -----"
 else
-    echo "----- Download powersOfTau28_hez_final_${PTAU}.ptau -----"
-    wget -P ./ptau https://hermez.s3-eu-west-1.amazonaws.com/powersOfTau28_hez_final_${PTAU}.ptau
+    echo "----- Download powersOfTau28_hez_final_20.ptau -----"
+    wget -P ./build/ptau https://hermez.s3-eu-west-1.amazonaws.com/powersOfTau28_hez_final_20.ptau
 fi
 
 cd build/zkin_js
@@ -19,19 +17,19 @@ cp witness.wtns ../witness.wtns
 cd ..
 
 # Start a new powers of tau ceremony
-snarkjs powersoftau new bn128 21 pot21_0000.ptau -v
+snarkjs powersoftau new bn128 20 pot20_0000.ptau -v
 
 # Contribute to the ceremony
-snarkjs powersoftau contribute pot21_0000.ptau pot21_0001.ptau --name="First contribution" -v
+snarkjs powersoftau contribute pot20_0000.ptau pot20_0001.ptau --name="First contribution" -v -e="random value 1"
 
 # Start generating th phase 2
-snarkjs powersoftau prepare phase2 pot21_0001.ptau pot21_final.ptau -v
+snarkjs powersoftau prepare phase2 pot20_0001.ptau pot20_final.ptau -v
 
 # Generate a .zkey file that will contain the proving and verification keys together with all phase 2 contributions
-snarkjs groth16 setup zkin.r1cs pot21_final.ptau ZkIn_0000.zkey
+snarkjs groth16 setup zkin.r1cs pot20_final.ptau ZkIn_0000.zkey
 
 # Contribute to the phase 2 of the ceremony
-snarkjs zkey contribute ZkIn_0000.zkey ZkIn_0001.zkey --name="1st Contributor Name" -v
+snarkjs zkey contribute ZkIn_0000.zkey ZkIn_0001.zkey --name="Second contribution" -v -e="random value 2"
 
 # Export the verification key
 snarkjs zkey export verificationkey ZkIn_0001.zkey verification_key.json

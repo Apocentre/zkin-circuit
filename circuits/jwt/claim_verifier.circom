@@ -35,6 +35,5 @@ template ClaimVerifier(
   }
   
   // 2. Decode the b64 encoded claim value
-  signal claim_ascii[max_claim_json_bytes] <== Base64Decode(max_claim_json_bytes)(claim);
-  out <== ClaimSanitizer(max_claim_json_bytes)(claim_ascii);
+  out <== Base64Decode(max_claim_json_bytes)(claim);
 }

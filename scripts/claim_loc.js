@@ -27,14 +27,12 @@ const findClaimLocation = (jwt, claim) => {
     clean_test, quote_at_0_index, colon_at_0_index, quote_and_colon_at_start, colon_and_quote_at_start, comma_at_the_end,
     quote_at_start_and_end, quote_and_comma_at_end, comma_and_quote_at_end, colon_at_start_and_comma_at_end,
   ];
-  console.log(versions)
 
   let claimLocation;
   let version = 0;
 
   for (let i = 0; i < versions.length; i++) {
     if(jwt.indexOf(versions[i]) !== -1) {
-      console.log(">>>>>>>", i)
       claimLocation = jwt.indexOf(versions[i]);
       version = versions[i];
       break;
