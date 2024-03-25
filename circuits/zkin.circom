@@ -78,7 +78,7 @@ template ZkIn(
   signal output iss_out[max_claim_json_bytes];
   signal output aud_out[max_claim_json_bytes];
   signal output nonce_out[max_claim_json_bytes];
-  var max_timestamp_len = 10;
+  var max_timestamp_len = 15;
   signal output exp_out[max_timestamp_len];
   signal output address;
   signal output modulus_out;
