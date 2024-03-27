@@ -107,7 +107,7 @@ template ZkIn(
   )(jwt_segments, exp, exp_loc);
   
   exp_out <== CopyArray(max_claim_json_bytes, max_timestamp_len)(exp_ascii);
-  address <== Address(max_claim_json_bytes, k)(sub_ascii, iss_out, aud_out, salt);
+  p <== Address(max_claim_json_bytes, k)(sub_ascii, iss_out, aud_out, salt);
   modulus_out <== Modulus()(modulus);
 }
 
